@@ -52,6 +52,32 @@
     position:relative;z-index:30;
   }
   .brand{display:flex;align-items:center;gap:10px;}
+  .lang-wrap{position:relative;display:flex;align-items:center;}
+  .lang-button{
+    background:var(--bg-panel-2);border:1px solid var(--line);color:var(--text-hi);padding:8px 12px;border-radius:999px;
+    font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;box-shadow:0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+  .lang-menu{
+    position:absolute;top:calc(100% + 8px);left:0;min-width:170px;background:var(--bg-panel);border:1px solid var(--line-soft);
+    border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 18px 40px rgba(0,0,0,0.32);z-index:40;
+  }
+  .lang-option{
+    background:transparent;border:none;text-align:left;color:var(--text-mid);padding:9px 10px;border-radius:8px;font-size:12.5px;
+  }
+  .lang-option:hover,.lang-option.active{background:var(--bg-panel-2);color:var(--text-hi);}
+  .lang-wrap{position:relative;display:flex;align-items:center;}
+  .lang-button{
+    background:var(--bg-panel-2);border:1px solid var(--line);color:var(--text-hi);padding:8px 12px;border-radius:999px;
+    font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px;box-shadow:0 0 0 1px rgba(255,255,255,0.02) inset;
+  }
+  .lang-menu{
+    position:absolute;top:calc(100% + 8px);left:0;min-width:170px;background:var(--bg-panel);border:1px solid var(--line-soft);
+    border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 18px 40px rgba(0,0,0,0.32);z-index:40;
+  }
+  .lang-option{
+    background:transparent;border:none;text-align:left;color:var(--text-mid);padding:9px 10px;border-radius:8px;font-size:12.5px;
+  }
+  .lang-option:hover,.lang-option.active{background:var(--bg-panel-2);color:var(--text-hi);}
   .brand-mark{font-size:22px;line-height:1;}
   .brand-text h1{font-family:var(--font-display);font-size:17px;margin:0;font-weight:700;letter-spacing:.2px;}
   .brand-text p{margin:0;font-size:11px;color:var(--text-low);letter-spacing:.3px;}
@@ -359,29 +385,39 @@
 <div id="app" class="hidden">
   <div class="topbar">
     <div class="brand">
+      <div class="lang-wrap">
+        <button class="lang-button" id="lang-button" type="button" aria-expanded="false">🌐 EN</button>
+        <div class="lang-menu hidden" id="lang-menu">
+          <button class="lang-option active" data-lang="en" type="button">English</button>
+          <button class="lang-option" data-lang="ta" type="button">தமிழ்</button>
+          <button class="lang-option" data-lang="ml" type="button">മലയാളം</button>
+          <button class="lang-option" data-lang="hi" type="button">हिन्दी</button>
+          <button class="lang-option" data-lang="te" type="button">తెలుగు</button>
+        </div>
+      </div>
       <div class="brand-mark">🌧️</div>
       <div class="brand-text">
-        <h1>FloodSafe Chennai</h1>
-        <p>Predict. Navigate. Stay Safe.</p>
+        <h1 data-i18n="brandTitle">FloodSafe Chennai</h1>
+        <p data-i18n="brandSubtitle">Predict. Navigate. Stay Safe.</p>
       </div>
     </div>
     <div class="topbar-right">
-      <div class="status-pill"><span class="dot"></span> System Active <span class="badge-demo">DEMO DATA</span></div>
-      <button class="emergency-btn" id="emergency-toggle">🆘 Emergency Mode</button>
+      <div class="status-pill"><span class="dot"></span> <span data-i18n="systemActive">System Active</span> <span class="badge-demo" data-i18n="demoData">DEMO DATA</span></div>
+      <button class="emergency-btn" id="emergency-toggle" data-i18n="emergencyToggle">🆘 Emergency Mode</button>
     </div>
   </div>
 
   <div class="sidebar">
-    <div class="nav-section-label">Overview</div>
-    <button class="nav-item active" data-view="dashboard">📊 &nbsp;Dashboard</button>
-    <div class="nav-section-label">Plan</div>
-    <button class="nav-item" data-view="route">🧭 &nbsp;Safe Route</button>
-    <button class="nav-item" data-view="facilities">🏥 &nbsp;Facilities</button>
-    <div class="nav-section-label">Emergency</div>
-    <button class="nav-item" data-view="emergency">🆘 &nbsp;Emergency Mode</button>
-    <button class="nav-item" data-view="helplines">📞 &nbsp;Helplines</button>
-    <button class="nav-item" data-view="ussd">📱 &nbsp;USSD Access</button>
-    <div class="sidebar-foot">All flood, weather &amp; facility data shown is illustrative demo data for this prototype. No live API keys required — the app runs fully offline-safe.</div>
+    <div class="nav-section-label" data-i18n="overview">Overview</div>
+    <button class="nav-item active" data-view="dashboard" data-i18n="navDashboard">📊 &nbsp;Dashboard</button>
+    <div class="nav-section-label" data-i18n="plan">Plan</div>
+    <button class="nav-item" data-view="route" data-i18n="navRoute">🧭 &nbsp;Safe Route</button>
+    <button class="nav-item" data-view="facilities" data-i18n="navFacilities">🏥 &nbsp;Facilities</button>
+    <div class="nav-section-label" data-i18n="emergency">Emergency</div>
+    <button class="nav-item" data-view="emergency" data-i18n="navEmergency">🆘 &nbsp;Emergency Mode</button>
+    <button class="nav-item" data-view="helplines" data-i18n="navHelplines">📞 &nbsp;Helplines</button>
+    <button class="nav-item" data-view="ussd" data-i18n="navUssd">📱 &nbsp;USSD Access</button>
+    <div class="sidebar-foot" data-i18n="sidebarFoot">All flood, weather &amp; facility data shown is illustrative demo data for this prototype. No live API keys required — the app runs fully offline-safe.</div>
   </div>
 
   <div class="main">
@@ -389,50 +425,50 @@
     <!-- DASHBOARD -->
     <div class="view active" id="view-dashboard">
       <div class="tagline-row">
-        <h2>Chennai Flood Overview</h2>
+        <h2 data-i18n="dashboardTitle">Chennai Flood Overview</h2>
         <span id="clock-line"></span>
       </div>
       <div class="stat-grid">
-        <div class="stat-card accent-left"><div class="label">CITYWIDE AVG RAINFALL</div><div class="value" id="stat-rain">–</div><div class="sub">mm, last hour</div></div>
-        <div class="stat-card warn-left"><div class="label">CITYWIDE FLOOD RISK</div><div class="value" id="stat-risk">–</div><div class="sub">/100 weighted score</div></div>
-        <div class="stat-card"><div class="label">HIGH / SEVERE ZONES</div><div class="value" id="stat-zones">–</div><div class="sub">of 15 tracked areas</div></div>
-        <div class="stat-card"><div class="label">SAFE ROUTES AVAILABLE</div><div class="value" id="stat-routes">8</div><div class="sub">to major hospitals</div></div>
+        <div class="stat-card accent-left"><div class="label" data-i18n="avgRainfallLabel">CITYWIDE AVG RAINFALL</div><div class="value" id="stat-rain">–</div><div class="sub" data-i18n="avgRainfallSub">mm, last hour</div></div>
+        <div class="stat-card warn-left"><div class="label" data-i18n="floodRiskLabel">CITYWIDE FLOOD RISK</div><div class="value" id="stat-risk">–</div><div class="sub" data-i18n="floodRiskSub">/100 weighted score</div></div>
+        <div class="stat-card"><div class="label" data-i18n="highSevereLabel">HIGH / SEVERE ZONES</div><div class="value" id="stat-zones">–</div><div class="sub" data-i18n="highSevereSub">of 15 tracked areas</div></div>
+        <div class="stat-card"><div class="label" data-i18n="safeRoutesLabel">SAFE ROUTES AVAILABLE</div><div class="value" id="stat-routes">8</div><div class="sub" data-i18n="safeRoutesSub">to major hospitals</div></div>
       </div>
 
       <div class="dash-grid">
         <div class="panel">
           <div class="panel-head">
-            <h3>🗺️ Chennai Flood Risk Map</h3>
-            <span class="badge-demo">15 monitored areas</span>
+            <h3 data-i18n="mapTitle">🗺️ Chennai Flood Risk Map</h3>
+            <span class="badge-demo" data-i18n="mapSubtitle">15 monitored areas</span>
           </div>
           <div class="layer-toggles" id="layer-toggles">
-            <button class="toggle-chip on" data-layer="risk">Risk Zones</button>
-            <button class="toggle-chip on" data-layer="hospitals">🏥 Hospitals</button>
-            <button class="toggle-chip" data-layer="ambulance">🚑 Ambulance</button>
-            <button class="toggle-chip" data-layer="fire">🚒 Fire Stations</button>
-            <button class="toggle-chip" data-layer="relief">🏫 Relief Centres</button>
+            <button class="toggle-chip on" data-layer="risk" data-i18n="riskZones">Risk Zones</button>
+            <button class="toggle-chip on" data-layer="hospitals" data-i18n="hospitalsFilter">🏥 Hospitals</button>
+            <button class="toggle-chip" data-layer="ambulance" data-i18n="ambulanceFilter">🚑 Ambulance</button>
+            <button class="toggle-chip" data-layer="fire" data-i18n="fireFilter">🚒 Fire Stations</button>
+            <button class="toggle-chip" data-layer="relief" data-i18n="reliefFilter">🏫 Relief Centres</button>
           </div>
           <div id="map"></div>
           <div class="map-legend">
-            <div class="legend-chip"><span class="legend-dot" style="background:var(--low)"></span> Low</div>
-            <div class="legend-chip"><span class="legend-dot" style="background:var(--moderate)"></span> Moderate</div>
-            <div class="legend-chip"><span class="legend-dot" style="background:var(--high)"></span> High</div>
-            <div class="legend-chip"><span class="legend-dot" style="background:var(--severe)"></span> Severe</div>
+            <div class="legend-chip"><span class="legend-dot" style="background:var(--low)"></span> <span data-i18n="legendLow">Low</span></div>
+            <div class="legend-chip"><span class="legend-dot" style="background:var(--moderate)"></span> <span data-i18n="legendModerate">Moderate</span></div>
+            <div class="legend-chip"><span class="legend-dot" style="background:var(--high)"></span> <span data-i18n="legendHigh">High</span></div>
+            <div class="legend-chip"><span class="legend-dot" style="background:var(--severe)"></span> <span data-i18n="legendSevere">Severe</span></div>
           </div>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div class="panel">
-            <div class="panel-head"><h3>📍 Area Detail</h3></div>
+            <div class="panel-head"><h3 data-i18n="areaDetailTitle">📍 Area Detail</h3></div>
             <div class="panel-body" id="area-detail">
-              <div class="area-detail-empty">Click any marker on the map to see its flood-risk breakdown.</div>
+              <div class="area-detail-empty" data-i18n="areaDetailEmpty">Click any marker on the map to see its flood-risk breakdown.</div>
             </div>
           </div>
           <div class="panel">
-            <div class="panel-head"><h3>📈 Next 3 Hours — Flood Risk</h3></div>
+            <div class="panel-head"><h3 data-i18n="forecastTitle">📈 Next 3 Hours — Flood Risk</h3></div>
             <div class="panel-body">
               <div class="forecast-row" id="forecast-row"></div>
-              <div class="disclaimer">Predicted flood risk — not a guaranteed forecast. Select an area above to update.</div>
+              <div class="disclaimer" data-i18n="forecastDisclaimer">Predicted flood risk — not a guaranteed forecast. Select an area above to update.</div>
             </div>
           </div>
         </div>
@@ -442,27 +478,27 @@
     <!-- SAFE ROUTE -->
     <div class="view" id="view-route">
       <div class="view-header">
-        <h2>🧭 Flood-Aware Safe Route</h2>
-        <p>FloodSafe compares a synthetic demo route using flood-risk data. It is not turn-by-turn navigation; verify roads and follow official emergency instructions.</p>
+        <h2 data-i18n="safeRouteTitle">🧭 Flood-Aware Safe Route</h2>
+        <p data-i18n="safeRouteText">FloodSafe compares a synthetic demo route using flood-risk data. It is not turn-by-turn navigation; verify roads and follow official emergency instructions.</p>
       </div>
       <div class="panel">
         <div class="panel-body">
           <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;" id="route-form-grid">
             <div>
-              <label>From</label>
+              <label data-i18n="fromLabel">From</label>
               <select id="route-from"></select>
             </div>
             <div>
-              <label>To</label>
+              <label data-i18n="toLabel">To</label>
               <select id="route-to"></select>
             </div>
-            <div><button class="btn" id="route-go">Find Routes</button></div>
+            <div><button class="btn" id="route-go" data-i18n="findRoutes">Find Routes</button></div>
           </div>
           <div id="route-results"></div>
           <div class="panel route-map-panel">
-            <div class="panel-head"><h3>🗺️ Route on map</h3><span class="badge-demo" id="route-map-status">Choose locations to preview</span></div>
+            <div class="panel-head"><h3 data-i18n="routeMapTitle">🗺️ Route on map</h3><span class="badge-demo" id="route-map-status" data-i18n="routeMapStatus">Choose locations to preview</span></div>
             <div id="route-map"></div>
-            <div class="route-map-legend"><span><i class="route-line"></i> AI Safe Route</span><span><i class="route-line warning"></i> Shortest Route</span><span>● Start</span><span>● Destination</span></div>
+            <div class="route-map-legend"><span><i class="route-line"></i> <span data-i18n="aiSafeRoute">AI Safe Route</span></span><span><i class="route-line warning"></i> <span data-i18n="shortestRoute">Shortest Route</span></span><span>● <span data-i18n="startPoint">Start</span></span><span>● <span data-i18n="destinationPoint">Destination</span></span></div>
           </div>
         </div>
       </div>
@@ -471,8 +507,8 @@
     <!-- FACILITIES -->
     <div class="view" id="view-facilities">
       <div class="view-header">
-        <h2>🏥 Nearby Emergency Facilities</h2>
-        <p>Hospitals, ambulance points, fire stations and relief centres across Chennai (demo dataset — structured so real open-data sources can replace it).</p>
+        <h2 data-i18n="facilitiesTitle">🏥 Nearby Emergency Facilities</h2>
+        <p data-i18n="facilitiesText">Hospitals, ambulance points, fire stations and relief centres across Chennai (demo dataset — structured so real open-data sources can replace it).</p>
       </div>
       <div class="dash-grid">
         <div class="panel"><div class="panel-head"><h3>🏥 Hospitals</h3></div><div class="panel-body facility-list" id="list-hospitals"></div></div>
@@ -487,24 +523,24 @@
     <!-- EMERGENCY -->
     <div class="view" id="view-emergency">
       <div class="view-header">
-        <h2>🆘 Emergency Route Assistant</h2>
-        <p>When activated, routing always prioritizes flood safety → road accessibility → facility proximity → distance, in that order.</p>
+        <h2 data-i18n="emergencyTitle">🆘 Emergency Route Assistant</h2>
+        <p data-i18n="emergencyText">When activated, routing always prioritizes flood safety → road accessibility → facility proximity → distance, in that order.</p>
       </div>
       <div class="panel">
         <div class="panel-body">
           <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;">
             <div>
-              <label>Starting location</label>
+              <label data-i18n="startingLocation">Starting location</label>
               <select id="em-from"></select>
             </div>
             <div>
-              <label>Destination / Hospital</label>
+              <label data-i18n="destinationHospital">Destination / Hospital</label>
               <select id="em-to"></select>
             </div>
-            <div><button class="btn" id="em-go">Get Emergency Route</button></div>
+            <div><button class="btn" id="em-go" data-i18n="getEmergencyRoute">Get Emergency Route</button></div>
           </div>
           <div id="em-results"></div>
-              <div class="disclaimer">Demo route geometry is illustrative, not turn-by-turn navigation. Follow official emergency instructions and road closures. In a real emergency, call 112 immediately.</div>
+              <div class="disclaimer" data-i18n="emergencyDisclaimer">Demo route geometry is illustrative, not turn-by-turn navigation. Follow official emergency instructions and road closures. In a real emergency, call 112 immediately.</div>
         </div>
       </div>
     </div>
@@ -512,8 +548,8 @@
     <!-- HELPLINES -->
     <div class="view" id="view-helplines">
       <div class="view-header">
-        <h2>📞 Emergency Helplines</h2>
-        <p>Tap a number to call directly on mobile devices.</p>
+        <h2 data-i18n="helplinesTitle">📞 Emergency Helplines</h2>
+        <p data-i18n="helplinesText">Tap a number to call directly on mobile devices.</p>
       </div>
       <div class="helpline-grid">
         <div class="helpline-card"><div class="num">112</div><div class="name">National Emergency Number</div><a class="callbtn" href="tel:112">Call 112</a></div>
@@ -525,14 +561,14 @@
     <!-- USSD -->
     <div class="view" id="view-ussd">
       <div class="view-header">
-        <h2>📱 Low-Connectivity / USSD Assistance</h2>
-        <p>A realistic simulation of emergency access over a basic feature phone when data connectivity is unavailable. This demo simulates the flow — no real telecom gateway is used.</p>
+        <h2 data-i18n="ussdTitle">📱 Low-Connectivity / USSD Assistance</h2>
+        <p data-i18n="ussdText">A realistic simulation of emergency access over a basic feature phone when data connectivity is unavailable. This demo simulates the flow — no real telecom gateway is used.</p>
       </div>
       <div class="ussd-phone">
-        <div class="ussd-screen" id="ussd-screen">Dial *123# to begin.</div>
+        <div class="ussd-screen" id="ussd-screen" data-i18n="ussdPrompt">Dial *123# to begin.</div>
         <div class="ussd-input-row">
-          <input type="text" id="ussd-input" placeholder="Type *123# then reply" />
-          <button class="btn" id="ussd-send">Send</button>
+          <input type="text" id="ussd-input" data-i18n-placeholder="ussdPlaceholder" placeholder="Type *123# then reply" />
+          <button class="btn" id="ussd-send" data-i18n="sendButton">Send</button>
         </div>
         <div class="ussd-keys">
           <button class="ussd-key" data-key="*123#">*123#</button>
@@ -562,15 +598,15 @@
   <div class="chat-head"><strong>🤖 FloodSafe AI Assistant</strong><button id="chat-close">✕</button></div>
   <div class="chat-body" id="chat-body"></div>
   <div class="chat-quick" id="chat-quick">
-    <button class="qchip" data-q="Check Flood Risk">Check Flood Risk</button>
-    <button class="qchip" data-q="Find Safe Route">Find Safe Route</button>
-    <button class="qchip" data-q="Emergency Help">Emergency Help</button>
-    <button class="qchip" data-q="Nearby Hospitals">Nearby Hospitals</button>
-    <button class="qchip" data-q="Flood Safety Tips">Flood Safety Tips</button>
+    <button class="qchip" data-q="Check Flood Risk" data-i18n="quickCheckRisk">Check Flood Risk</button>
+    <button class="qchip" data-q="Find Safe Route" data-i18n="quickSafeRoute">Find Safe Route</button>
+    <button class="qchip" data-q="Emergency Help" data-i18n="quickEmergencyHelp">Emergency Help</button>
+    <button class="qchip" data-q="Nearby Hospitals" data-i18n="quickHospitals">Nearby Hospitals</button>
+    <button class="qchip" data-q="Flood Safety Tips" data-i18n="quickSafetyTips">Flood Safety Tips</button>
   </div>
   <div class="chat-input-row">
-    <input type="text" id="chat-input" placeholder="Ask e.g. Is Velachery safe?" />
-    <button id="chat-send">Send</button>
+    <input type="text" id="chat-input" data-i18n-placeholder="chatPlaceholder" placeholder="Ask e.g. Is Velachery safe?" />
+    <button id="chat-send" data-i18n="sendButton">Send</button>
   </div>
 </div>
 
@@ -956,6 +992,439 @@ document.querySelectorAll('.ussd-key').forEach(k=>{
 /* =========================================================================
    AI FLOOD ASSISTANT (rule-based fallback — always available, no LLM key needed)
    ========================================================================= */
+const translations = {
+  en: {
+    brandTitle: 'FloodSafe Chennai',
+    brandSubtitle: 'Predict. Navigate. Stay Safe.',
+    systemActive: 'System Active',
+    demoData: 'DEMO DATA',
+    emergencyToggle: '🆘 Emergency Mode',
+    overview: 'Overview',
+    plan: 'Plan',
+    emergency: 'Emergency',
+    navDashboard: '📊 &nbsp;Dashboard',
+    navRoute: '🧭 &nbsp;Safe Route',
+    navFacilities: '🏥 &nbsp;Facilities',
+    navEmergency: '🆘 &nbsp;Emergency Mode',
+    navHelplines: '📞 &nbsp;Helplines',
+    navUssd: '📱 &nbsp;USSD Access',
+    sidebarFoot: 'All flood, weather &amp; facility data shown is illustrative demo data for this prototype. No live API keys required — the app runs fully offline-safe.',
+    dashboardTitle: 'Chennai Flood Overview',
+    avgRainfallLabel: 'CITYWIDE AVG RAINFALL',
+    avgRainfallSub: 'mm, last hour',
+    floodRiskLabel: 'CITYWIDE FLOOD RISK',
+    floodRiskSub: '/100 weighted score',
+    highSevereLabel: 'HIGH / SEVERE ZONES',
+    highSevereSub: 'of 15 tracked areas',
+    safeRoutesLabel: 'SAFE ROUTES AVAILABLE',
+    safeRoutesSub: 'to major hospitals',
+    mapTitle: '🗺️ Chennai Flood Risk Map',
+    mapSubtitle: '15 monitored areas',
+    riskZones: 'Risk Zones',
+    hospitalsFilter: '🏥 Hospitals',
+    ambulanceFilter: '🚑 Ambulance',
+    fireFilter: '🚒 Fire Stations',
+    reliefFilter: '🏫 Relief Centres',
+    legendLow: 'Low',
+    legendModerate: 'Moderate',
+    legendHigh: 'High',
+    legendSevere: 'Severe',
+    areaDetailTitle: '📍 Area Detail',
+    areaDetailEmpty: 'Click any marker on the map to see its flood-risk breakdown.',
+    forecastTitle: '📈 Next 3 Hours — Flood Risk',
+    forecastDisclaimer: 'Predicted flood risk — not a guaranteed forecast. Select an area above to update.',
+    safeRouteTitle: '🧭 Flood-Aware Safe Route',
+    safeRouteText: 'FloodSafe compares a synthetic demo route using flood-risk data. It is not turn-by-turn navigation; verify roads and follow official emergency instructions.',
+    fromLabel: 'From',
+    toLabel: 'To',
+    findRoutes: 'Find Routes',
+    routeMapTitle: '🗺️ Route on map',
+    routeMapStatus: 'Choose locations to preview',
+    aiSafeRoute: 'AI Safe Route',
+    shortestRoute: 'Shortest Route',
+    startPoint: 'Start',
+    destinationPoint: 'Destination',
+    facilitiesTitle: '🏥 Nearby Emergency Facilities',
+    facilitiesText: 'Hospitals, ambulance points, fire stations and relief centres across Chennai (demo dataset — structured so real open-data sources can replace it).',
+    emergencyTitle: '🆘 Emergency Route Assistant',
+    emergencyText: 'When activated, routing always prioritizes flood safety → road accessibility → facility proximity → distance, in that order.',
+    startingLocation: 'Starting location',
+    destinationHospital: 'Destination / Hospital',
+    getEmergencyRoute: 'Get Emergency Route',
+    emergencyDisclaimer: 'Demo route geometry is illustrative, not turn-by-turn navigation. Follow official emergency instructions and road closures. In a real emergency, call 112 immediately.',
+    helplinesTitle: '📞 Emergency Helplines',
+    helplinesText: 'Tap a number to call directly on mobile devices.',
+    ussdTitle: '📱 Low-Connectivity / USSD Assistance',
+    ussdText: 'A realistic simulation of emergency access over a basic feature phone when data connectivity is unavailable. This demo simulates the flow — no real telecom gateway is used.',
+    ussdPrompt: 'Dial *123# to begin.',
+    ussdPlaceholder: 'Type *123# then reply',
+    sendButton: 'Send',
+    quickCheckRisk: 'Check Flood Risk',
+    quickSafeRoute: 'Find Safe Route',
+    quickEmergencyHelp: 'Emergency Help',
+    quickHospitals: 'Nearby Hospitals',
+    quickSafetyTips: 'Flood Safety Tips',
+    chatPlaceholder: 'Ask e.g. Is Velachery safe?',
+    loginTitle: 'Sign in to FloodSafe',
+    loginCopy: 'Choose the workspace you need for this session.',
+    loginEmail: 'Work email or phone',
+    loginPassword: 'Password',
+    continueText: 'Continue to FloodSafe',
+    loginNote: 'Prototype access: any valid-looking email and password are accepted. Responder workspaces contain demo operational data.'
+  },
+  ta: {
+    brandTitle: 'புன்னியக் சென்னை',
+    brandSubtitle: 'முன்கூட்டியே தெரிந்து பாதுகாப்பாக பயணம் செய்க.',
+    systemActive: 'சிஸ்டம் செயல்பாட்டில்',
+    demoData: 'டெமோ தரவு',
+    emergencyToggle: '🆘 அவசர பயன்முறை',
+    overview: 'கண்ணோட்டம்',
+    plan: 'திட்டம்',
+    emergency: 'அவசரம்',
+    navDashboard: '📊 &nbsp;டாஷ்போர்டு',
+    navRoute: '🧭 &nbsp;பாதுகாப்பான பாதை',
+    navFacilities: '🏥 &nbsp;மையங்கள்',
+    navEmergency: '🆘 &nbsp;அவசர பயன்முறை',
+    navHelplines: '📞 &nbsp;தொடர்பு எண்கள்',
+    navUssd: '📱 &nbsp;USSD அணுகல்',
+    sidebarFoot: 'காட்டப்படும் வெள்ளம், வானிலை மற்றும் வசதி தரவுகள் அனைத்தும் மாதிரி டெமோ தரவு. நேரடி API விசைகள் தேவையில்லை — பயன்பாடு முழுவதும் ஆஃப்லைன் பாதுகாப்பாக இயங்குகிறது.',
+    dashboardTitle: 'சென்னை வெள்ள கண்ணோட்டம்',
+    avgRainfallLabel: 'மொத்த சராசரி மழை',
+    avgRainfallSub: 'மிமீ, கடந்த மணிநேரம்',
+    floodRiskLabel: 'மொத்த வெள்ள ஆபத்து',
+    floodRiskSub: '/100 எடைபோடப்பட்ட மதிப்பெண்',
+    highSevereLabel: 'உயர் / கடுமையான பகுதிகள்',
+    highSevereSub: '15 கண்காணிக்கப்பட்ட பகுதிகளில்',
+    safeRoutesLabel: 'பாதுகாப்பான பாதைகள்',
+    safeRoutesSub: 'முக்கிய மருத்துவமனைகளுக்கு',
+    mapTitle: '🗺️ சென்னை வெள்ள ஆபத்து வரைபடம்',
+    mapSubtitle: '15 கண்காணிக்கப்பட்ட பகுதிகள்',
+    riskZones: 'ஆபத்து மண்டலங்கள்',
+    hospitalsFilter: '🏥 மருத்துவமனைகள்',
+    ambulanceFilter: '🚑 ஆம்புலன்ஸ்',
+    fireFilter: '🚒 தீயணைப்பு நிலையங்கள்',
+    reliefFilter: '🏫 நிவாரண மையங்கள்',
+    legendLow: 'குறைவு',
+    legendModerate: 'மிதமானது',
+    legendHigh: 'உயர்',
+    legendSevere: 'கடுமையான',
+    areaDetailTitle: '📍 பகுதி விவரம்',
+    areaDetailEmpty: 'வரைபடத்தில் எந்த மார்க்கரும் கிளிக் செய்யப்பட்டால் அதன் வெள்ள ஆபத்து பகுப்பாய்வு காண்பится.',
+    forecastTitle: '📈 அடுத்த 3 மணி நேரம் — வெள்ள ஆபத்து',
+    forecastDisclaimer: 'முன்கணிக்கப்பட்ட வெள்ள ஆபத்து — உறுதி செய்யப்பட்ட முன்னறிவிப்பு அல்ல. மேலே ஒரு பகுதியை தேர்ந்தெடுக்கவும்.',
+    safeRouteTitle: '🧭 வெள்ள-அறிவுள்ள பாதுகாப்பான பாதை',
+    safeRouteText: 'FloodSafe வெள்ள ஆபத்து தரவுகளின் அடிப்படையில் மாதிரி பாதையை ஒப்பிடுகிறது. இது வழிகாட்டும் பாதை அல்ல; சாலைகளை சரிபார்த்து அதிகாரப்பூர்வ அவசர அறிவுறுத்தல்களை பின்பற்றவும்.',
+    fromLabel: 'முதல்',
+    toLabel: 'க்கு',
+    findRoutes: 'பாதைகளை கண்டறி',
+    routeMapTitle: '🗺️ வரைபடத்தில் பாதை',
+    routeMapStatus: 'முன்னோட்டத்திற்காக இடங்களை தேர்ந்தெடுக்கவும்',
+    aiSafeRoute: 'AI பாதுகாப்பான பாதை',
+    shortestRoute: 'குறுகிய பாதை',
+    startPoint: 'தொடக்கம்',
+    destinationPoint: 'இலக்கு',
+    facilitiesTitle: '🏥 அருகிலுள்ள அவசர வசதிகள்',
+    facilitiesText: 'சென்னையில் மருத்துவமனைகள், ஆம்புலன்ஸ் புள்ளிகள், தீயணைப்பு நிலையங்கள் மற்றும் நிவாரண மையங்கள் (டெமோ தரவு).',
+    emergencyTitle: '🆘 அவசர பாதை உதவியாளர்',
+    emergencyText: 'செயல்படுத்தப்படும் போது, பாதை எப்போதும் வெள்ள பாதுகாப்பு → சாலை அணுகல் → வசதி அருகாமை → தூரம் என்ற வரிசையில் தேர்ந்தெடுக்கப்படும்.',
+    startingLocation: 'புறப்படும் இடம்',
+    destinationHospital: 'இலக்கு / மருத்துவமனை',
+    getEmergencyRoute: 'அவசர பாதையைப் பெறுக',
+    emergencyDisclaimer: 'டெமோ பாதை ஜியோமெட்ரி மாதிரியாகும்; இது துல்லியமான பயண வழி அல்ல. அதிகாரப்பூர்வ அவசர அறிவுறுத்தல்களையும் சாலை மூடல்களையும் பின்பற்றவும். உண்மையான அவசரத்தின் போது 112 ஐ அழைக்கவும்.',
+    helplinesTitle: '📞 அவசர உதவி எண்கள்',
+    helplinesText: 'மொபைல் சாதனங்களில் நேரடியாக அழைக்க எண்களை தொடவும்.',
+    ussdTitle: '📱 குறைந்த இணைப்பு / USSD உதவி',
+    ussdText: 'தரவு இணைப்பு இல்லாத போது அடிப்படை தொலைபேசியில் அவசர அணுகலுக்கான யதார்த்தமான உருவகப்படுத்துதல்.',
+    ussdPrompt: '*123# டயல் செய்து தொடங்கவும்.',
+    ussdPlaceholder: '*123# உள்ளிட்டு பதில் அளிக்கவும்',
+    sendButton: 'அனுப்பு',
+    quickCheckRisk: 'வெள்ள ஆபத்தை சரிபார்',
+    quickSafeRoute: 'பாதுகாப்பான பாதை தேடு',
+    quickEmergencyHelp: 'அவசர உதவி',
+    quickHospitals: 'அருகிலுள்ள மருத்துவமனைகள்',
+    quickSafetyTips: 'வெள்ள பாதுகாப்பு குறிப்புகள்',
+    chatPlaceholder: 'எ.g. வேளச்சேரி பாதுகாப்பானதா?',
+    loginTitle: 'FloodSafe-க்கு உள்நுழைக',
+    loginCopy: 'இந்த அமர்வுக்கு தேவையான பணியிடத்தை தேர்ந்தெடுக்கவும்.',
+    loginEmail: 'வேலை மின்னஞ்சல் அல்லது தொலைபேசி',
+    loginPassword: 'கடவுச்சொல்',
+    continueText: 'FloodSafe-க்கு தொடர்க',
+    loginNote: 'மாதிரி அணுகல்: ஏதேனும் சரியான வடிவ email அல்லது password ஏற்றுக்கொள்ளப்படும். பதிலளிப்போர் பணியிடங்கள் மாதிரி செயல்பாட்டு தரவைக் கொண்டிருக்கும்.'
+  },
+  ml: {
+    brandTitle: 'ഫ്ലഡ്സേഫ് ചെന്നൈ',
+    brandSubtitle: 'മുമ്പേ കണക്കാക്കി, സുരക്ഷിതമായി പോവുക.',
+    systemActive: 'സിസ്റ്റം সক്രിയം',
+    demoData: 'ഡെമോ ഡാറ്റ',
+    emergencyToggle: '🆘 அவസര മോഡ്',
+    overview: 'അവലോകനം',
+    plan: 'പ്ലാൻ',
+    emergency: 'അവസരം',
+    navDashboard: '📊 &nbsp;ഡാഷ്ബോർഡ്',
+    navRoute: '🧭 &nbsp;സുരക്ഷിത വഴി',
+    navFacilities: '🏥 &nbsp;സൗകര്യങ്ങൾ',
+    navEmergency: '🆘 &nbsp;അവസര മോഡ്',
+    navHelplines: '📞 &nbsp;ഹെൽപ്ലൈനുകൾ',
+    navUssd: '📱 &nbsp;USSD ആക്സസ്',
+    sidebarFoot: 'കാണിക്കുന്ന വെള്ളക്കെട്ട്, കാലാവസ്ഥ, സൗകര്യ ഡാറ്റകൾ എല്ലാം ഡെമോ മാതൃകയിൽ നൽകിയവയാണു. നേരിട്ടുള്ള API കീകൾ വേണ്ട; ആപ്പ് ഓഫ്ലൈനിലാണ്.',
+    dashboardTitle: 'ചെന്നൈ വെള്ളപ്പൊക്ക അവലോകനം',
+    avgRainfallLabel: 'മൊത്തം ശരാശരി മഴ',
+    avgRainfallSub: 'മിമീ, കഴിഞ്ഞ മണിക്കൂർ',
+    floodRiskLabel: 'മൊത്തം വെള്ളപ്പൊക്ക അപകടം',
+    floodRiskSub: '/100 ഭാരം ചേർത്ത സ്കോർ',
+    highSevereLabel: 'ഉയർന്ന / ഗുരുതര മേഖലകൾ',
+    highSevereSub: '15 നിരീക്ഷിക്കപ്പെട്ട പ്രദേശങ്ങളിൽ',
+    safeRoutesLabel: 'സുരക്ഷിത വഴികൾ ഉണ്ട്',
+    safeRoutesSub: 'പ്രധാന ആശുപത്രികളിലേക്ക്',
+    mapTitle: '🗺️ ചെന്നൈ വെള്ളപ്പൊക്ക അപകട ഭൂപടം',
+    mapSubtitle: '15 നിരീക്ഷിക്കപ്പെട്ട പ്രദേശങ്ങൾ',
+    riskZones: 'അപകട മേഖലകൾ',
+    hospitalsFilter: '🏥 ആശുപത്രികൾ',
+    ambulanceFilter: '🚑 ആംബുലൻസ്',
+    fireFilter: '🚒 അഗ്നിശമന സേന',
+    reliefFilter: '🏫 രക്ഷാ കേന്ദ്രങ്ങൾ',
+    legendLow: 'കുറവ്',
+    legendModerate: 'ഇടത്തരം',
+    legendHigh: 'ഉയർന്ന',
+    legendSevere: 'ഗുരുതരമാണ്',
+    areaDetailTitle: '📍 പ്രദേശ വിശദാംശങ്ങൾ',
+    areaDetailEmpty: 'ഭൂപടത്തിൽ ഏതെങ്കിലും മാർക്കറിൽ ക്ലിക്ക് ചെയ്യുമ്പോൾ അതിന്റെ വെള്ളപ്പൊക്ക അപകട വിശകലനം കാണാം.',
+    forecastTitle: '📈 അടുത്ത 3 മണിക്കൂർ — വെള്ളപ്പൊക്ക അപകടം',
+    forecastDisclaimer: 'മുന് പ്രവചനം — ഉറപ്പുള്ള പ്രവചനം അല്ല. മുകളിൽ പ്രദേശം തിരഞ്ഞെടുക്കുക.',
+    safeRouteTitle: '🧭 വെള്ളപ്പൊക്ക-അറിവുള്ള സുരക്ഷിത വഴിയ',
+    safeRouteText: 'FloodSafe വെള്ളപ്പൊക്ക അപകട ഡാറ്റയെ അടിസ്ഥാനമാക്കി ഒരു ഡെമോ റോഡ് comparação ചെയ്യുന്നു. ഇത് ടേൺ-ബൈ-ടേൺ നാവിഗേഷൻ അല്ല; റോഡുകൾ പരിശോധിച്ച് ഔദ്യോഗിക മുന്നറിയിപ്പുകൾ പാലിക്കുക.',
+    fromLabel: 'തുടക്കം',
+    toLabel: 'കൂട്ടം',
+    findRoutes: 'വഴികൾ കണ്ടെത്തുക',
+    routeMapTitle: '🗺️ ഭൂപടത്തിലെ വഴി',
+    routeMapStatus: 'മുൻകൂർ കാണാൻ സ്ഥലങ്ങൾ തിരഞ്ഞെടുക്കുക',
+    aiSafeRoute: 'AI സുരക്ഷിത വഴി',
+    shortestRoute: 'ചെറുതായ വഴിയ',
+    startPoint: 'ആരംഭം',
+    destinationPoint: 'ലക്ഷ്യം',
+    facilitiesTitle: '🏥 निकटतम அவசர സൗകര്യങ്ങൾ',
+    facilitiesText: 'ചെന്നൈയിൽ ആശുപത്രികൾ, ആംബുലൻസ് പോയിൻ്റുകൾ, അഗ്നിശമന സേനാ நிலையങ്ങൾ, രക്ഷാ കേന്ദ്രങ്ങൾ (ഡെമോ ഡാറ്റ).',
+    emergencyTitle: '🆘 அவസര റൂട്ട് അസിസ്റ്റന്റ്',
+    emergencyText: 'സജീവമാക്കുമ്പോൾ, റൂട്ടിംഗ് എപ്പോൾ ചെയ്യാനും വെള്ളപ്പൊക്ക സുരക്ഷ → റോഡ് പ്രവേശനം → സൗകര്യ സമീപസ്ഥാനം → ദൂരം എന്ന ക്രമത്തിൽ prioritized ആണ്.',
+    startingLocation: 'പുറപ്പെടുന്ന സ്ഥലം',
+    destinationHospital: 'ലക്ഷ്യം / ആശുപത്രി',
+    getEmergencyRoute: 'അവസര വഴിയ ചേർക്കുക',
+    emergencyDisclaimer: 'ഡെമോ റൂട്ടിംഗിന്റെ ജിയോമെട്രി ഒരു മാതൃക മാത്രമാണ്; ടേൺ-ബൈ-ടേൺ നാവിഗേഷൻ അല്ല. ഔദ്യോഗിക നിർദ്ദേശങ്ങൾ പാലിക്കുക. യഥാർത്ഥ അവസരത്തിൽ 112-ന് വിളിക്കുക.',
+    helplinesTitle: '📞 അവസര ഹെൽപ്ലൈനുകൾ',
+    helplinesText: 'മൊബൈൽ ഉപകരണങ്ങളിൽ നേരിട്ട് വിളിക്കാൻ നമ്പറുകൾ ടാപ്പുചെയ്യുക.',
+    ussdTitle: '📱 കുറഞ്ഞ കണക്റ്റിവിറ്റി / USSD സഹായം',
+    ussdText: 'ഡാറ്റ കണക്റ്റിവിറ്റി ഇല്ലാത്തപ്പോൾ ഫീച്ചർ ഫോണിൽ സിമുലേറ്റ് ചെയ്യുന്ന അവസര ആക്സസ്.',
+    ussdPrompt: '*123# ഡയൽ ചെയ്യൂ.',
+    ussdPlaceholder: '*123# ടൈപ്പ് ചെയ്ത് മറുപടി നൽകൂ',
+    sendButton: 'അയയ്ക്കുക',
+    quickCheckRisk: 'വെള്ളപ്പൊക്ക അപകടം പരിശോധിക്കുക',
+    quickSafeRoute: 'സുരക്ഷിത വഴിയ കണ്ടെത്തുക',
+    quickEmergencyHelp: 'അവസര സഹായം',
+    quickHospitals: 'അടുത്തുള്ള ആശുപത്രികൾ',
+    quickSafetyTips: 'വെള്ളപ്പൊക്ക സുരക്ഷാ സൂചകങ്ങൾ',
+    chatPlaceholder: 'ഉദാ: വേളചേരി സുരക്ഷിതമാണോ?',
+    loginTitle: 'FloodSafe-ലേക്ക് സൈൻ ഇൻ ചെയ്യുക',
+    loginCopy: 'ഈ സെഷനിനുള്ള വർക്ക്സ്പേസ് തിരഞ്ഞെടുക്കുക.',
+    loginEmail: 'വർക്ക് ഇമെയിൽ അല്ലെങ്കിൽ ഫോൺ',
+    loginPassword: 'പാസ്വേഡ്',
+    continueText: 'FloodSafe-ലേക്ക് തുടരുക',
+    loginNote: 'ഡെമോ ആക്സസ്: ഏതെങ്കിലും ശരിയായ ഇമെയിൽ/പാസ്വേഡ് സ്വീകരിക്കും. റസ്പോണ്ടർ വർക്ക്സ്പേസുകൾക്ക് ഡെമോ ഓപ്പറേഷൻ ഡാറ്റ ഉണ്ടാകും.'
+  },
+  hi: {
+    brandTitle: 'फ्लडसेफ चेन्नई',
+    brandSubtitle: 'पहले जानें, सुरक्षित यात्रा करें।',
+    systemActive: 'सिस्टम सक्रिय',
+    demoData: 'डेमो डेटा',
+    emergencyToggle: '🆘 आपात मोड',
+    overview: 'अवलोकन',
+    plan: 'योजना',
+    emergency: 'आपातकाल',
+    navDashboard: '📊 &nbsp;डैशबोर्ड',
+    navRoute: '🧭 &nbsp;सुरक्षित मार्ग',
+    navFacilities: '🏥 &nbsp;सुविधाएँ',
+    navEmergency: '🆘 &nbsp;आपात मोड',
+    navHelplines: '📞 &nbsp;हेल्पलाइन',
+    navUssd: '📱 &nbsp;USSD एक्सेस',
+    sidebarFoot: 'दिखाए गए बाढ़, मौसम और सुविधा डेटा सभी डेमो डेटा हैं। कोई लाइव API key आवश्यक नहीं है — ऐप पूरी तरह ऑफलाइन सुरक्षित है।',
+    dashboardTitle: 'चेन्नई बाढ़ अवलोकन',
+    avgRainfallLabel: 'सभी क्षेत्रों की औसत वर्षा',
+    avgRainfallSub: 'मिमी, पिछले घंटे',
+    floodRiskLabel: 'सभी क्षेत्रों की बाढ़ जोखिम',
+    floodRiskSub: '/100 भारित स्कोर',
+    highSevereLabel: 'उच्च / गंभीर क्षेत्र',
+    highSevereSub: '15 ट्रैक किए गए क्षेत्रों में',
+    safeRoutesLabel: 'सुरक्षित मार्ग उपलब्ध',
+    safeRoutesSub: 'मुख्य अस्पतालों के लिए',
+    mapTitle: '🗺️ चेन्नई बाढ़ जोखिम नक्शा',
+    mapSubtitle: '15 निगरानी क्षेत्र',
+    riskZones: 'जोखिम क्षेत्र',
+    hospitalsFilter: '🏥 अस्पताल',
+    ambulanceFilter: '🚑 एम्बुलेंस',
+    fireFilter: '🚒 अग्निशमन',
+    reliefFilter: '🏫 राहत केंद्र',
+    legendLow: 'कम',
+    legendModerate: 'मध्यम',
+    legendHigh: 'उच्च',
+    legendSevere: 'गंभीर',
+    areaDetailTitle: '📍 क्षेत्र विवरण',
+    areaDetailEmpty: 'नक्शे पर किसी मार्कर पर क्लिक करें, तो उसका बाढ़ जोखिम विवरण दिखेगा।',
+    forecastTitle: '📈 अगले 3 घंटे — बाढ़ जोखिम',
+    forecastDisclaimer: 'पूर्वानुमानित बाढ़ जोखिम — निश्चित पूर्वानुमान नहीं है। ऊपर से क्षेत्र चुनें।',
+    safeRouteTitle: '🧭 बाढ़-चेतन सुरक्षित मार्ग',
+    safeRouteText: 'FloodSafe बाढ़ जोखिम डेटा के आधार पर सिंथेटिक डेमो रोड की तुलना करता है। यह टर्न-बाय-टर्न नेविगेशन नहीं है; सड़कें सत्यापित करें और आधिकारिक आपात निर्देशों का पालन करें।',
+    fromLabel: 'से',
+    toLabel: 'तक',
+    findRoutes: 'मार्ग खोजें',
+    routeMapTitle: '🗺️ नक्शे पर मार्ग',
+    routeMapStatus: 'पूर्वावलोकन के लिए स्थान चुनें',
+    aiSafeRoute: 'AI सुरक्षित मार्ग',
+    shortestRoute: 'सबसे छोटा मार्ग',
+    startPoint: 'शुरू',
+    destinationPoint: 'गंतव्य',
+    facilitiesTitle: '🏥 आस-पास की आपात सुविधाएँ',
+    facilitiesText: 'चेन्नई में अस्पताल, एम्बुलेंस पॉइंट, अग्निशमन स्टेशन और राहत केंद्र (डेमो डेटा).',
+    emergencyTitle: '🆘 आपात मार्ग सहायक',
+    emergencyText: 'सक्रिय होने पर मार्ग हमेशा इस क्रम में चुना जाता है: बाढ़ सुरक्षा → सड़क पहुंच → सुविधा निकटता → दूरी।',
+    startingLocation: 'प्रस्थान स्थान',
+    destinationHospital: 'गंतव्य / अस्पताल',
+    getEmergencyRoute: 'आपात मार्ग प्राप्त करें',
+    emergencyDisclaimer: 'डेमो मार्ग ज्यामिति केवल उदाहरण है; यह टर्न-बाय-टर्न नेविगेशन नहीं है। आधिकारिक आपात निर्देशों और सड़क बंदों का पालन करें। वास्तविक आपात स्थिति में 112 पर कॉल करें।',
+    helplinesTitle: '📞 आपातकालीन हेल्पलाइन',
+    helplinesText: 'मोबाइल डिवाइस पर सीधे कॉल करने के लिए नंबर पर टैप करें।',
+    ussdTitle: '📱 कम-कनेक्टिविटी / USSD सहायता',
+    ussdText: 'जब डेटा कनेक्टिविटी न हो, तो बेसिक फीचर फोन पर आपात एक्सेस का यथार्थवादी अनुकरण।',
+    ussdPrompt: '*123# डायल करके शुरू करें।',
+    ussdPlaceholder: '*123# टाइप करें और उत्तर दें',
+    sendButton: 'भेजें',
+    quickCheckRisk: 'बाढ़ जोखिम जाँचें',
+    quickSafeRoute: 'सुरक्षित मार्ग खोजें',
+    quickEmergencyHelp: 'आपात सहायता',
+    quickHospitals: 'नज़दीकी अस्पताल',
+    quickSafetyTips: 'बाढ़ सुरक्षा सुझाव',
+    chatPlaceholder: 'उदा. वेलाचेरि सुरक्षित है?',
+    loginTitle: 'FloodSafe में साइन इन करें',
+    loginCopy: 'इस सत्र के लिए वर्कस्पेस चुनें।',
+    loginEmail: 'कार्य ईमेल या फोन',
+    loginPassword: 'पासवर्ड',
+    continueText: 'FloodSafe में जारी रखें',
+    loginNote: 'डेमो एक्सेस: कोई भी सही स्वरूप ईमेल या पासवर्ड स्वीकार किया जाएगा। रिस्पॉंसर वर्कस्पेस में डेमो ऑपरेशन डेटा होगा।'
+  },
+  te: {
+    brandTitle: 'ఫ్లడ్‌సేఫ్ చెన్నై',
+    brandSubtitle: 'ముందే తెలుసుకొని,.Safe అయిన మార్గంలో ప్రయాణించండి.',
+    systemActive: 'సిస్టం సక్రియంగా ఉంది',
+    demoData: 'డెమో డేటా',
+    emergencyToggle: '🆘 అత్యవసర మోడ్',
+    overview: 'అవలోకనం',
+    plan: 'ప్రణాళిక',
+    emergency: 'అత్యవసర',
+    navDashboard: '📊 &nbsp;డాష్‌బోర్డ్',
+    navRoute: '🧭 &nbsp;సురక్షిత మార్గం',
+    navFacilities: '🏥 &nbsp;సౌకర్యాలు',
+    navEmergency: '🆘 &nbsp;అత్యవసర మోడ్',
+    navHelplines: '📞 &nbsp;హెల్ప్‌లైన్‌లు',
+    navUssd: '📱 &nbsp;USSD యాక్సెస్',
+    sidebarFoot: 'చూపించే వరదలు, వాతావరణం మరియు సౌకర్య డేటా అన్నీ డెమో డేటా మాత్రమే. ప్రత్యక్ష API కీలు అవసరం లేదు; ఆప్ పూర్తిగా ఆఫ్‌లైన్‌లో పనిచేస్తుంది.',
+    dashboardTitle: 'చెన్నై వరద అవలోకనం',
+    avgRainfallLabel: 'మొత్తం సరాసరి వర్షం',
+    avgRainfallSub: 'mm, గత గంట',
+    floodRiskLabel: 'మొత్తం వరద ప్రమాదం',
+    floodRiskSub: '/100 బరువు గల స్కోర్',
+    highSevereLabel: 'ఉన్నత / తీవ్రమైన జోన్లు',
+    highSevereSub: '15 అనుసరించబడుతున్న ప్రాంతాలలలో',
+    safeRoutesLabel: 'సురక్షిత మార్గాలు అందుబాటులో',
+    safeRoutesSub: 'ప్రధాన ఆస్పత్రులకు',
+    mapTitle: '🗺️ చెన్నై వరద ప్రమాద పటం',
+    mapSubtitle: '15 పర్యవేక్షించబడుతున్న ప్రాంతాలు',
+    riskZones: 'ప్రమాద జోన్లు',
+    hospitalsFilter: '🏥 ఆస్పత్రులు',
+    ambulanceFilter: '🚑 అంబులెన్స్',
+    fireFilter: '🚒 అగ్నిమాపక కేంద్రాలు',
+    reliefFilter: '🏫 సహాయ కేంద్రాలు',
+    legendLow: 'తక్కువ',
+    legendModerate: 'మధ్యస్థాయి',
+    legendHigh: 'ఉన్నతం',
+    legendSevere: 'తీవ్రమైన',
+    areaDetailTitle: '📍 ప్రాంత వివరాలు',
+    areaDetailEmpty: 'పటంలోని ఎలాంటి మార్కర్‌పై క్లిక్ చేస్తే ఆ ప్రాంతం వరద ప్రమాదం వివరాలు కనబడతాయి.',
+    forecastTitle: '📈 తర్వాత 3 గంటలు — వరద ప్రమాదం',
+    forecastDisclaimer: 'అంచనా వరద ప్రమాదం — ఖచ్చితమైన అంచనా కాదు. పైన ప్రాంతాన్ని ఎంచుకోండి.',
+    safeRouteTitle: '🧭 వరద-మతిన సురక్షిత మార్గం',
+    safeRouteText: 'FloodSafe వరద ప్రమాద డేటా ఆధారంగా సింథటిక్ డెమో మార్గాన్ని సరిపోలుస్తుంది. ఇది టర్న్-బై-టర్న్ నావిగేషన్ కాదు; రోడ్లను పరిశీలించి అధికారిక అత్యవసర సూచనలను పాటించండి.',
+    fromLabel: 'నుండి',
+    toLabel: 'కు',
+    findRoutes: 'మార్గాలను కనుగొనండి',
+    routeMapTitle: '🗺️ పటంలో మార్గం',
+    routeMapStatus: 'ప్రీవ్యూతోసం స్థలాలను ఎంచుకోండి',
+    aiSafeRoute: 'AI సురక్షిత మార్గం',
+    shortestRoute: 'చిన్న మార్గం',
+    startPoint: 'ప్రారంభం',
+    destinationPoint: 'గమ్యం',
+    facilitiesTitle: '🏥 సమీప అత్యవసర సౌకర్యాలు',
+    facilitiesText: 'చెన్నైలో ఆస్పత్రులు, అంబులెన్స్ పాయింట్లు, అగ్నిమాపక కేంద్రాలు మరియు సహాయ కేంద్రాలు (డెమో డేటా).',
+    emergencyTitle: '🆘 అత్యవసర మార్గ సహాయకం',
+    emergencyText: 'యాక్టివేట్ చేయబడినప్పుడు, మార్గం ఎల్లప్పుడూ వరద భద్రత → రోడ్ యాక్సెస్ → సౌకర్య సమీపం → దూరం క్రమంలో ఎంచుకోబడుతుంది.',
+    startingLocation: 'ప్రారంభ స్థలం',
+    destinationHospital: 'గమ్యం / ఆస్పత్రి',
+    getEmergencyRoute: 'అత్యవసర మార్గాన్ని పొందండి',
+    emergencyDisclaimer: 'డెమో మార్గం జియోమీట్రీ ఉదాహరణ మాత్రమే; ఇది టర్న్-బై-టర్న్ నావిగేషన్ కాదు. అధికారిక అత్యవసర సూచనలను మరియు రోడ్డు బందీలను పాటించండి. నిజమైన అత్యవసరంలో 112కు కాల్ చేయండి.',
+    helplinesTitle: '📞 అత్యవసర హెల్ప్‌లైన్‌లు',
+    helplinesText: 'మొబైల్ పరికరంలో నేరుగా కాల్ చేయడానికి నంబర్‌పై ట్యాప్ చేయండి.',
+    ussdTitle: '📱 తక్కువ కనెక్టివిటీ / USSD సహాయం',
+    ussdText: 'డేటా కనెక్టివిటీ లేకుండా ప్రాథమిక ఫీచర్‌ ఫోన్‌లో అత్యవసర యాక్సెస్ కోసం వాస్తవిక సిమ్యులేషన్.',
+    ussdPrompt: '*123# డయల్ చేసి ప్రారంభించండి.',
+    ussdPlaceholder: '*123# టైప్ చేసి స్పందించండి',
+    sendButton: 'పంపు',
+    quickCheckRisk: 'వరద ప్రమాదాన్ని పరీక్షించండి',
+    quickSafeRoute: 'సురక్షిత మార్గాన్ని కనుగొనండి',
+    quickEmergencyHelp: 'అత్యవసర సహాయం',
+    quickHospitals: 'సమీప ఆస్పత్రులు',
+    quickSafetyTips: 'వరద భద్రత సూచనలు',
+    chatPlaceholder: 'ఉదా. వాలాచేరి సురక్షితమేనా?',
+    loginTitle: 'FloodSafeలో సైన్ ఇన్ చేయండి',
+    loginCopy: 'ఈ సెషన్ కోసం వర్క్‌స్పేస్‌ను ఎంచుకోండి.',
+    loginEmail: 'కార్య ఇమెయిల్ లేదా ఫోన్',
+    loginPassword: 'పాస్వర్డ్',
+    continueText: 'FloodSafeకు కొనసాగండి',
+    loginNote: 'డెమో యాక్సెస్: ఏదైనా సరైన పద్ధతి ఇమెయిల్ లేదా పాస్వర్డ్‌ను స్వీకరించబడుతుంది. రెస్పాన్డర్ వర్క్‌స్పేస్‌లో డెమో ఆపరేషన్ డేటా ఉంటుంది.'
+  }
+};
+
+const langButton = document.getElementById('lang-button');
+const langMenu = document.getElementById('lang-menu');
+const langOptions = document.querySelectorAll('.lang-option');
+let currentLanguage = 'en';
+
+function applyTranslations(lang){
+  currentLanguage = lang;
+  const dict = translations[lang] || translations.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const value = dict[key];
+    if (value) el.innerHTML = value;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    const value = dict[key];
+    if (value) el.placeholder = value;
+  });
+  const currentLabel = langButton.textContent.trim();
+  langButton.textContent = '🌐 ' + (lang === 'ta' ? 'தமிழ்' : lang === 'ml' ? 'മലയാളം' : lang === 'hi' ? 'हिन्दी' : lang === 'te' ? 'తెలుగు' : 'EN');
+  langOptions.forEach(opt => opt.classList.toggle('active', opt.dataset.lang === lang));
+  langMenu.classList.add('hidden');
+  langButton.setAttribute('aria-expanded', 'false');
+  document.documentElement.lang = lang;
+}
+
+langButton.addEventListener('click', ()=>{
+  const hidden = langMenu.classList.toggle('hidden');
+  langButton.setAttribute('aria-expanded', String(!hidden));
+});
+
+langOptions.forEach(option => {
+  option.addEventListener('click', () => applyTranslations(option.dataset.lang));
+});
+
 const chatFab = document.getElementById('chat-fab');
 const chatPanel = document.getElementById('chat-panel');
 const chatBody = document.getElementById('chat-body');
