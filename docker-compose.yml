@@ -1,0 +1,30 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://floodsafe:floodsafe@db:5432/floodsafe
+      ALLOWED_ORIGINS: http://localhost:8000
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: floodsafe
+      POSTGRES_USER: floodsafe
+      POSTGRES_PASSWORD: floodsafe
+    ports:
+      - "5432:5432"
+    volumes:
+      - floodsafe_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U floodsafe -d floodsafe"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  floodsafe_db:
