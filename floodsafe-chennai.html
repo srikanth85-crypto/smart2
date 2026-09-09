@@ -214,6 +214,29 @@
   .helpline-card .name{font-size:12.5px;color:var(--text-mid);margin:6px 0 12px;}
   .helpline-card a.callbtn{display:inline-block;background:var(--bg-panel-2);border:1px solid var(--line);padding:8px 14px;border-radius:var(--radius-sm);font-size:12px;text-decoration:none;color:var(--text-hi);}
   .helpline-card a.callbtn:hover{border-color:var(--accent);}
+  .report-bot{margin-top:18px;background:var(--bg-panel);border:1px solid var(--line-soft);border-radius:var(--radius-lg);padding:16px;}
+  .report-bot h4{margin:0 0 12px;font-family:var(--font-display);font-size:18px;}
+  .report-list{display:grid;grid-template-columns:1fr;gap:8px;}
+  .report-option{background:var(--bg-panel-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text-hi);text-align:left;font-size:13px;}
+  .report-option:hover{border-color:var(--accent);}
+  .report-output{margin-top:12px;padding:12px;border-radius:var(--radius-sm);background:rgba(87,166,184,0.08);border:1px solid var(--line);line-height:1.6;font-size:12.5px;color:var(--text-mid);}
+  .report-output strong{color:var(--text-hi);}
+  .voice-assistant{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg-panel-2);}
+  .voice-assistant p{margin:0;color:var(--text-mid);font-size:12px;line-height:1.45;}
+  .voice-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+  @media(max-width:700px){.voice-assistant{align-items:flex-start;flex-direction:column;}.voice-actions{justify-content:flex-start;}}
+    .incident-form{margin:16px 0 12px;padding:14px;border:1px solid var(--line);border-radius:var(--radius-md);background:rgba(16,24,40,.24);}
+    .incident-form h5{margin:0 0 12px;font-family:var(--font-display);font-size:15px;}
+    .incident-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .incident-form-grid .full{grid-column:1/-1;}
+    .incident-form textarea{width:100%;min-height:74px;resize:vertical;padding:9px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--bg-panel-2);color:var(--text-hi);font:13px var(--font-body);margin-bottom:12px;}
+    .incident-form textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+    .incident-form input[type=file]{width:100%;padding:8px;border:1px dashed var(--line);border-radius:var(--radius-sm);background:var(--bg-panel-2);color:var(--text-mid);font-size:12px;margin-bottom:8px;}
+    .image-preview{display:none;align-items:center;gap:10px;margin-bottom:12px;color:var(--text-mid);font-size:11.5px;}
+    .image-preview.visible{display:flex;}
+    .image-preview img{width:58px;height:58px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--line);}
+    .report-note{font-size:11px;color:var(--text-low);margin:-4px 0 12px;}
+    @media(max-width:700px){.incident-form-grid{grid-template-columns:1fr;}.incident-form-grid .full{grid-column:auto;}}
 
   .facility-list{display:flex;flex-direction:column;gap:0;}
   .facility-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-soft);font-size:13px;}
@@ -311,12 +334,31 @@
   .auth-form input:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .auth-submit{width:100%;padding:12px 16px;border:0;border-radius:var(--radius-sm);background:var(--accent);color:#04181f;font-weight:700;font-size:13px;}
   .auth-note{font-size:11px;color:var(--text-low);line-height:1.5;margin:14px 0 0;text-align:center;}
+  .auth-links{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;font-size:12px;}
+  .text-button{border:0;background:none;color:var(--accent-hi);padding:0;font:inherit;cursor:pointer;}
+  .provider-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .provider-button{padding:10px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--bg-panel-2);color:var(--text-hi);font-weight:600;font-size:12px;}
+  .provider-button:hover{border-color:var(--accent);}
+  .account-menu-wrap{position:relative;}
+  .account-menu-button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:var(--bg-panel-2);color:var(--text-hi);font-size:19px;line-height:1;}
+  .account-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:150px;padding:6px;background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:0 16px 36px rgba(0,0,0,.35);z-index:40;}
+  .account-menu button{width:100%;padding:9px 10px;border:0;border-radius:var(--radius-sm);background:none;color:var(--text-mid);text-align:left;font:12px var(--font-body);}
+  .account-menu button:hover{background:var(--bg-panel-2);color:var(--text-hi);}
+  .modal-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:rgba(4,12,17,.76);}
+  .modal-card{width:min(100%,430px);padding:24px;background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:0 22px 60px rgba(0,0,0,.5);}
+  .modal-card h3{margin:0 0 6px;font:700 22px var(--font-display);}
+  .modal-card p{margin:0 0 18px;color:var(--text-mid);font-size:12px;line-height:1.5;}
+  .modal-card input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--bg-panel-2);color:var(--text-hi);font:13px var(--font-body);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;}
   .responder-app{min-height:100vh;background:var(--bg-deep);padding:24px 28px 50px;}
   .responder-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;border-bottom:1px solid var(--line-soft);padding-bottom:20px;margin-bottom:20px;}
   .responder-head h2{font:700 26px var(--font-display);margin:5px 0 4px;}
   .responder-head p{color:var(--text-mid);font-size:13px;margin:0;}
   .responder-actions{display:flex;gap:8px;align-items:center;}
   .responder-role{font:600 11px var(--font-mono);color:var(--warm);border:1px solid rgba(240,168,87,.35);padding:7px 10px;border-radius:var(--radius-sm);white-space:nowrap;}
+  .responder-notification{display:none;margin:-6px 0 16px;padding:11px 14px;border:1px solid var(--severe);border-radius:var(--radius-md);background:rgba(225,92,80,.14);color:var(--text-hi);font-size:12px;}
+  .responder-notification.visible{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .responder-notification button{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--bg-panel-2);color:var(--text-hi);padding:6px 9px;font-size:11px;}
   .responder-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:16px;align-items:start;}
   .responder-grid .panel{border-radius:var(--radius-md);}
   .responder-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
@@ -331,7 +373,15 @@
   .ops-meta{text-align:right;min-width:92px;}
   .priority{font:600 11px var(--font-mono);color:var(--severe);}
   .location-chip{display:inline-block;margin-top:5px;font-size:10.5px;color:var(--accent-hi);}
+  .queue-actions{display:flex;gap:6px;margin-top:9px;}
+  .queue-action{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--bg-panel-2);color:var(--text-mid);padding:6px 9px;font-size:11px;}
+  .queue-action.agree{border-color:rgba(79,174,123,.65);color:var(--low);}
+  .queue-action.disagree{border-color:rgba(225,92,80,.65);color:var(--severe);}
+  .queue-action:disabled{opacity:.55;cursor:default;}
   .responder-map{height:280px;background:#0d1e28;position:relative;overflow:hidden;}
+  .responder-map.fullscreen{position:fixed;inset:0;z-index:100;height:100vh;width:100vw;border:0;}
+  .responder-map-exit{display:none;position:absolute;top:18px;right:18px;z-index:5;border:1px solid rgba(255,255,255,.35);border-radius:var(--radius-sm);background:rgba(11,23,32,.92);color:var(--text-hi);padding:9px 12px;font-size:12px;cursor:pointer;}
+  .responder-map.fullscreen .responder-map-exit{display:block;}
   .responder-map .ol-viewport{height:100%;width:100%;}
   .responder-map .ol-control button{background:rgba(11,23,32,.88);color:var(--text-hi);}
   @media (max-width:760px){.auth-shell,.responder-grid{grid-template-columns:1fr}.auth-intro{padding:30px}.auth-signal{margin-top:24px}.auth-form{padding:28px 24px}.responder-app{padding:18px 14px 36px}.responder-head{display:block}.responder-actions{margin-top:14px;justify-content:space-between}.responder-stat-grid{grid-template-columns:1fr 1fr}.responder-stat:last-child{grid-column:1/-1}}
@@ -345,7 +395,7 @@
       <div class="auth-kicker">Chennai emergency intelligence</div>
       <h2>Know the water. Choose the safer way forward.</h2>
       <p>FloodSafe connects residents and response teams to one live operational picture of flood risk, safe locations and emergency routes.</p>
-      <div class="auth-signal"><span class="dot"></span> Demo network active · Chennai region</div>
+      <div class="auth-signal"><span class="dot"></span> Chennai emergency network active</div>
     </div>
     <form class="auth-form" id="login-form">
       <h3>Sign in to FloodSafe</h3>
@@ -360,16 +410,34 @@
       <label for="login-password">Password</label>
       <input id="login-password" type="password" placeholder="Enter your password" required />
       <button class="auth-submit" type="submit">Continue to FloodSafe</button>
-      <p class="auth-note">Prototype access: any valid-looking email and password are accepted. Responder workspaces contain demo operational data.</p>
+      <div class="provider-row">
+        <button class="provider-button" type="button" data-provider="google">Continue with Google</button>
+        <button class="provider-button" type="button" data-provider="apple">Continue with Apple</button>
+      </div>
+      <div class="auth-links"><span>New resident?</span><button class="text-button" id="open-register" type="button">Create an account</button></div>
+      <p class="auth-note">Only registered users and authorized response accounts can sign in. Responder access is role-controlled.</p>
     </form>
   </div>
 </section>
+
+<div class="modal-backdrop hidden" id="register-modal" role="dialog" aria-modal="true" aria-labelledby="register-title">
+  <form class="modal-card" id="register-form">
+    <h3 id="register-title">Create a resident account</h3>
+    <p>Register once, then sign in with your verified email and password.</p>
+    <label for="register-email">Email address</label>
+    <input id="register-email" type="email" autocomplete="email" required placeholder="you@example.com" />
+    <label for="register-password">Create secure login code</label>
+    <input id="register-password" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters" />
+    <div class="modal-actions"><button class="btn secondary" id="close-register" type="button">Cancel</button><button class="btn" type="submit">Register</button></div>
+  </form>
+</div>
 
 <section class="responder-app hidden" id="responder-app">
   <div class="responder-head">
     <div><div class="auth-kicker">Priority response workspace</div><h2 id="responder-title">Ambulance dispatch view</h2><p id="responder-subtitle">Safety locations and rescue requests, ordered for field response.</p></div>
     <div class="responder-actions"><span class="responder-role" id="responder-role">AMBULANCE UNIT</span><button class="btn secondary" id="responder-logout">Sign out</button></div>
   </div>
+  <div class="responder-notification" id="responder-notification" role="status"><span id="responder-notification-text"></span><button id="responder-notification-close" type="button">Dismiss</button></div>
   <div class="responder-stat-grid" id="responder-stats"></div>
   <div class="responder-grid">
     <div class="panel"><div class="panel-head"><h3>🆘 Prioritized rescue queue</h3><span class="badge-demo">Updated just now</span></div><div class="panel-body ops-list" id="rescue-queue"></div></div>
@@ -404,6 +472,7 @@
     <div class="topbar-right">
       <div class="status-pill"><span class="dot"></span> <span data-i18n="systemActive">System Active</span> <span class="badge-demo" data-i18n="demoData">DEMO DATA</span></div>
       <button class="emergency-btn" id="emergency-toggle" data-i18n="emergencyToggle">🆘 Emergency Mode</button>
+      <div class="account-menu-wrap"><button class="account-menu-button" id="account-menu-button" type="button" aria-label="Open account menu" aria-expanded="false">⋮</button><div class="account-menu hidden" id="account-menu"><button id="account-logout" type="button">Sign out</button></div></div>
     </div>
   </div>
 
@@ -416,6 +485,7 @@
     <div class="nav-section-label" data-i18n="emergency">Emergency</div>
     <button class="nav-item" data-view="emergency" data-i18n="navEmergency">🆘 &nbsp;Emergency Mode</button>
     <button class="nav-item" data-view="helplines" data-i18n="navHelplines">📞 &nbsp;Helplines</button>
+    <button class="nav-item" data-view="report" data-i18n="navReport">📝 &nbsp;Report Incident</button>
     <button class="nav-item" data-view="ussd" data-i18n="navUssd">📱 &nbsp;USSD Access</button>
     <div class="sidebar-foot" data-i18n="sidebarFoot">All flood, weather &amp; facility data shown is illustrative demo data for this prototype. No live API keys required — the app runs fully offline-safe.</div>
   </div>
@@ -555,6 +625,69 @@
         <div class="helpline-card"><div class="num">112</div><div class="name">National Emergency Number</div><a class="callbtn" href="tel:112">Call 112</a></div>
         <div class="helpline-card"><div class="num">108</div><div class="name">Emergency Ambulance Service</div><a class="callbtn" href="tel:108">Call 108</a></div>
         <div class="helpline-card"><div class="num">101</div><div class="name">Fire &amp; Rescue</div><a class="callbtn" href="tel:101">Call 101</a></div>
+      </div>
+
+      <div class="report-bot" id="flood-report-bot">
+        <h4>📞 New Toll-Free Number: 1800 425 3222</h4>
+        <div class="helpline-card" style="margin-bottom:12px;">
+          <div class="num">1800 425 3222</div>
+          <div class="name">Flood Emergency Response Hotline</div>
+          <a class="callbtn" href="tel:18004253222">Call Flood Hotline</a>
+        </div>
+        <div class="voice-assistant" aria-live="polite">
+          <p><strong>Voice help for 1800 425 3222</strong><br />Hear the hotline number and speak an emergency request in this browser.</p>
+          <div class="voice-actions"><button class="btn secondary" id="voice-help-start" type="button">🎙️ Start voice help</button><a class="btn" href="tel:18004253222">☎ Call toll-free</a></div>
+        </div>
+        <form class="incident-form" id="incident-report-form">
+          <h5>📝 File an incident report</h5>
+          <div class="incident-form-grid">
+            <div>
+              <label for="incident-area">Area</label>
+              <select id="incident-area" required></select>
+            </div>
+            <div>
+              <label for="incident-issue">What kind of problem?</label>
+              <select id="incident-issue" required>
+                <option value="road_flood">Flooded road or waterlogging</option>
+                <option value="medical">Medical emergency, illness or medicine needed</option>
+                <option value="bike_accident">Accident, injury or rescue needed</option>
+                <option value="tree_fall">Fallen tree or blocked road</option>
+                <option value="wire_cut">Live wire or electrical danger</option>
+                <option value="evacuation">Evacuation or shelter assistance</option>
+              </select>
+            </div>
+            <div>
+              <label for="incident-department">Department needed</label>
+              <select id="incident-department" disabled><option>Public Works Department</option></select>
+            </div>
+            <div>
+              <label for="incident-image">Upload condition image</label>
+              <input id="incident-image" type="file" accept="image/*" />
+              <div class="image-preview" id="incident-image-preview"><img id="incident-image-thumb" alt="Selected condition preview" /><span id="incident-image-name"></span></div>
+            </div>
+            <div class="full">
+              <label for="incident-description">Describe the condition</label>
+              <textarea id="incident-description" placeholder="For example: water is 2 feet deep outside the bus stop"></textarea>
+              <p class="report-note">Your selected area and image will be shared with the routed department.</p>
+            </div>
+          </div>
+          <button class="btn" type="submit">Submit incident report</button>
+        </form>
+        <div class="report-list">
+          <button class="report-option" data-report="road_flood" data-label="Road is fully flooded">1. Road is full of water</button>
+          <button class="report-option" data-report="bike_accident" data-label="Bike accident due to flood">2. Bike accident due to flood</button>
+          <button class="report-option" data-report="medical" data-label="Medical emergency or medicine needed">3. Medical emergency or medicine needed</button>
+          <button class="report-option" data-report="tree_fall" data-label="Fallen tree or blocked road">4. Fallen tree or blocked road</button>
+          <button class="report-option" data-report="wire_cut" data-label="Power line / wire is in water">5. Live wire in flood water</button>
+        </div>
+        <div class="chat-box" style="margin-top:12px; border:1px solid var(--line); border-radius:12px; background:rgba(16,24,40,.3); padding:12px;">
+          <div id="report-chat-output" class="report-output" style="margin-top:0; min-height:96px;">Bot: Hello, I can help file a flood emergency report. Please tell me the issue and I will route it to the right department.</div>
+          <div style="display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:10px;">
+            <input id="report-chat-input" type="text" placeholder="Type: 'road is flooded near Velachery'" style="width:100%; border:1px solid var(--line); background:var(--bg-panel-2); color:var(--text-hi); border-radius:10px; padding:10px 12px;" />
+            <button id="report-chat-send" class="btn">Send</button>
+          </div>
+        </div>
+        <div class="report-output" id="report-output" style="margin-top:12px;">Choose a report type and the bot will send it to the right department with the caller location.</div>
       </div>
     </div>
 
@@ -733,6 +866,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(routeMap);
 const routeLayer = L.layerGroup().addTo(routeMap);
 let responderMap = null;
+let responderDecisionLayer = null;
 
 const riskLayer = L.layerGroup().addTo(map);
 const hospLayer = L.layerGroup().addTo(map);
@@ -838,12 +972,14 @@ tickClock(); setInterval(tickClock, 30000);
    NAVIGATION
    ========================================================================= */
 function goToView(name){
+  const targetName = name === 'report' ? 'helplines' : name;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('view-'+targetName).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
   document.querySelectorAll('.bottom-nav button').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
-  if(name==='dashboard'){ setTimeout(()=>map.invalidateSize(), 50); }
-  if(name==='route'){ setTimeout(()=>routeMap.invalidateSize(), 50); }
+  if(targetName==='dashboard'){ setTimeout(()=>map.invalidateSize(), 50); }
+  if(targetName==='route'){ setTimeout(()=>routeMap.invalidateSize(), 50); }
+  if(name==='report'){ setTimeout(()=>document.getElementById('incident-report-form').scrollIntoView({behavior:'smooth', block:'start'}), 50); }
 }
 document.querySelectorAll('.nav-item, .bottom-nav button').forEach(btn=>{
   btn.addEventListener('click', ()=>goToView(btn.dataset.view));
@@ -892,11 +1028,17 @@ function renderRouteMap(fromPt, toPt, fromName, toName){
 }
 
 function renderRouteResult(containerId, fromId, toId, isEmergency){
-  const fromPt = pointFor(fromId), toPt = pointFor(toId);
-  const fromName = DESTINATIONS.find(d=>d.id===fromId).name;
-  const toName = DESTINATIONS.find(d=>d.id===toId).name;
-  const routes = buildRoutes(fromPt, toPt, fromPt.risk, toPt.risk);
+  const fromDestination = DESTINATIONS.find(d=>d.id===fromId);
+  const toDestination = DESTINATIONS.find(d=>d.id===toId);
   const c = document.getElementById(containerId);
+  if(!fromDestination || !toDestination || fromId === toId){
+    c.innerHTML = '<div class="report-output"><strong>Choose two different locations.</strong><br>Select a starting location and a destination or hospital, then try again.</div>';
+    return;
+  }
+  const fromPt = pointFor(fromId), toPt = pointFor(toId);
+  const fromName = fromDestination.name;
+  const toName = toDestination.name;
+  const routes = buildRoutes(fromPt, toPt, fromPt.risk, toPt.risk);
   const emergencyNote = isEmergency ? `<div class="recommend-box" style="margin-bottom:14px;border-color:var(--severe);">Priority order: <b>Flood safety → Road accessibility → Facility proximity → Distance</b>.</div>` : '';
   c.innerHTML = `
     ${emergencyNote}
@@ -923,8 +1065,20 @@ function renderRouteResult(containerId, fromId, toId, isEmergency){
 document.getElementById('route-go').addEventListener('click', ()=>{
   renderRouteResult('route-results', document.getElementById('route-from').value, document.getElementById('route-to').value, false);
 });
-document.getElementById('em-go').addEventListener('click', ()=>{
-  renderRouteResult('em-results', document.getElementById('em-from').value, document.getElementById('em-to').value, true);
+document.getElementById('em-go').addEventListener('click', (event)=>{
+  const button = event.currentTarget;
+  const from = document.getElementById('em-from').value;
+  const to = document.getElementById('em-to').value;
+  button.disabled = true;
+  button.textContent = 'Preparing route...';
+  try{
+    renderRouteResult('em-results', from, to, true);
+  }catch(error){
+    document.getElementById('em-results').innerHTML = `<div class="report-output"><strong>Route unavailable.</strong><br>${error.message || 'Please choose the locations again.'}</div>`;
+  }finally{
+    button.disabled = false;
+    button.textContent = 'Get Emergency Route';
+  }
 });
 renderRouteResult('route-results', document.getElementById('route-from').value, document.getElementById('route-to').value, false);
 
@@ -959,14 +1113,25 @@ renderFacilityList('list-relief', RELIEF, '🏫');
    ========================================================================= */
 const ussdScreen = document.getElementById('ussd-screen');
 let ussdState = 'idle';
+let ussdLanguage = 'en';
 function ussdPrint(text){ ussdScreen.textContent = text; }
 function ussdMenu(){
   ussdState = 'menu';
-  ussdPrint("FloodSafe *123#\n\n1. Flood Risk\n2. Safe Route\n3. Emergency Help\n4. Nearby Hospital\n5. Safety Tips\n\nReply with a number.");
+  ussdPrint(`FloodSafe *123# (${ussdLanguage.toUpperCase()})\n\n1. Flood Risk\n2. Safe Route\n3. Emergency Help\n4. Nearby Hospital\n5. Safety Tips\n\nReply with a number.`);
 }
 function ussdHandle(input){
   input = input.trim();
-  if(input === '*123#'){ ussdMenu(); return; }
+  if(input === '*123#'){
+    ussdState = 'language';
+    ussdPrint('Select language / மொழியைத் தேர்வு செய்க\n\n1. English\n2. Tamil\n3. Telugu\n4. Hindi');
+    return;
+  }
+  if(ussdState === 'language'){
+    const languages = {1:'en',2:'ta',3:'te',4:'hi'};
+    if(languages[input]){ ussdLanguage = languages[input]; ussdMenu(); }
+    else ussdPrint('Choose 1 English, 2 Tamil, 3 Telugu, or 4 Hindi.');
+    return;
+  }
   if(ussdState === 'menu'){
     const refArea = AREAS.find(a=>a.id==='velachery');
     if(input==='1'){ ussdState='result'; ussdPrint(`Flood Risk — ${refArea.name}\n\nYour selected area has ${refArea.level} flood risk (${refArea.score}/100).\n${recommendedAction(refArea.level)}\n\n0. Back to menu`); }
@@ -987,6 +1152,212 @@ document.getElementById('ussd-send').addEventListener('click', ()=>{
 });
 document.querySelectorAll('.ussd-key').forEach(k=>{
   k.addEventListener('click', ()=> ussdHandle(k.dataset.key));
+});
+
+const voiceHelpStart = document.getElementById('voice-help-start');
+voiceHelpStart.addEventListener('click', () => {
+  const speak = (text) => { if('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); };
+  speak('FloodSafe toll-free emergency response hotline. The number is 1 800 425 3222. Please describe your emergency after the beep.');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ voiceHelpStart.textContent = 'Voice playback started'; return; }
+  const recognition = new SpeechRecognition();
+  recognition.lang = currentLanguage === 'ta' ? 'ta-IN' : currentLanguage === 'hi' ? 'hi-IN' : currentLanguage === 'te' ? 'te-IN' : 'en-IN';
+  recognition.onstart = () => { voiceHelpStart.textContent = 'Listening...'; };
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    document.getElementById('report-chat-input').value = transcript;
+    handleReportChatMessage();
+    speak('Your request was understood and routed to the responsible emergency team.');
+  };
+  recognition.onerror = () => { voiceHelpStart.textContent = 'Try voice help again'; };
+  recognition.onend = () => { voiceHelpStart.textContent = '🎙️ Start voice help'; };
+  recognition.start();
+});
+
+/* =========================================================================
+   FLOOD REPORT BOT
+   ========================================================================= */
+const departmentMap = {
+  road_flood: { department: 'Public Works Department', priority: 'High', issue: 'Flooded Road / Waterlogged Street' },
+  medical: { department: 'Emergency Medical Services', priority: 'Critical', issue: 'Medical Emergency / Medicine Needed' },
+  bike_accident: { department: 'Emergency Medical Services', priority: 'Critical', issue: 'Flood-Related Accident / Rescue Needed' },
+  tree_fall: { department: 'Fire & Rescue', priority: 'High', issue: 'Fallen Tree / Blocked Road' },
+  wire_cut: { department: 'Electricity Board + Fire Rescue', priority: 'Critical', issue: 'Live Wire in Flood Water' }
+  ,evacuation: { department: 'Disaster Response & Relief', priority: 'Critical', issue: 'Evacuation / Shelter Assistance' }
+};
+
+function nearestAreaFromCoordinates(lat, lng){
+  let nearest = AREAS[0];
+  let shortest = Number.POSITIVE_INFINITY;
+  for(const area of AREAS){
+    const dist = Math.hypot(area.lat - lat, area.lng - lng);
+    if(dist < shortest){ shortest = dist; nearest = area; }
+  }
+  return nearest;
+}
+
+function getCurrentLocationContext(){
+  return new Promise((resolve) => {
+    if(!navigator || !navigator.geolocation){
+      const fallback = AREAS.find(a => a.id === 'velachery') || AREAS[0];
+      resolve({ lat: fallback.lat, lng: fallback.lng, area: fallback.name, source: 'fallback' });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const area = nearestAreaFromCoordinates(pos.coords.latitude, pos.coords.longitude);
+      resolve({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        area: area.name,
+        source: 'gps'
+      });
+    }, () => {
+      const fallback = AREAS.find(a => a.id === 'velachery') || AREAS[0];
+      resolve({ lat: fallback.lat, lng: fallback.lng, area: fallback.name, source: 'fallback' });
+    }, { timeout: 5000, enableHighAccuracy: false });
+  });
+}
+
+function sendFloodReport(reportType, labelText, formDetails = {}){
+  const dept = departmentMap[reportType];
+  const selectedArea = formDetails.areaId ? AREAS.find(a => a.id === formDetails.areaId) : null;
+  const locationPromise = selectedArea ? Promise.resolve({ lat: selectedArea.lat, lng: selectedArea.lng, area: selectedArea.name, source: 'selected' }) : getCurrentLocationContext();
+  locationPromise.then((location) => {
+    const area = selectedArea || AREAS.find(a => a.name.toLowerCase() === location.area.toLowerCase()) || AREAS[0];
+    const reportPayload = {
+      report_type: reportType,
+      description: formDetails.description || `${labelText} near ${area.name} in Chennai`,
+      area_id: area.id,
+      latitude: Number(location.lat),
+      longitude: Number(location.lng),
+      priority: dept.priority.toLowerCase(),
+      image_name: formDetails.imageName || null,
+      image_type: formDetails.imageType || null,
+      image_size: formDetails.imageSize || null,
+      image_data: formDetails.imageData || null
+    };
+
+    fetch(`${API_BASE}/api/flood-reports`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reportPayload)
+    })
+    .then(async (response) => {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.detail || 'Could not save report');
+      }
+      const output = document.getElementById('report-output');
+      output.innerHTML = `
+        <strong>Emergency report accepted.</strong><br>
+        <strong>Type:</strong> ${labelText}<br>
+        <strong>Department:</strong> ${data.department}<br>
+        <strong>Image:</strong> ${data.image_attached ? 'Attached' : 'Not attached'}<br>
+        <strong>Priority:</strong> ${data.priority}<br>
+        <strong>Area:</strong> ${data.area_name}<br>
+        <strong>Location:</strong> ${data.location.latitude}, ${data.location.longitude}<br>
+        <strong>Status:</strong> ${data.status}<br>
+        <strong>Dispatch:</strong> Report sent to ${data.department} with caller location shared.
+      `;
+      document.getElementById('report-chat-output').innerHTML = `Bot: Report recorded for ${data.department}. The incident has been saved to the FloodSafe database and routed with location data.`;
+      localStorage.setItem('floodsafe_report_updated_at', String(Date.now()));
+      if('BroadcastChannel' in window){
+        const channel = new BroadcastChannel('floodsafe-reports');
+        channel.postMessage({id:data.id, reportType:data.report_type, department:data.department, priority:data.priority});
+        channel.close();
+      }
+      console.log('Flood emergency report sent:', data);
+    })
+    .catch((error) => {
+      document.getElementById('report-output').innerHTML = `<strong>Local fallback:</strong> ${labelText}<br><strong>Department:</strong> ${dept.department}<br><strong>Warning:</strong> ${error.message}. The report was generated locally but not stored because the backend is unavailable.`;
+      document.getElementById('report-chat-output').innerHTML = `Bot: I could not reach the backend, so I kept the report locally. Please ensure the API is running on localhost:8000.`;
+    });
+  });
+}
+
+const incidentArea = document.getElementById('incident-area');
+AREAS.forEach((area) => {
+  incidentArea.insertAdjacentHTML('beforeend', `<option value="${area.id}">${area.name}</option>`);
+});
+incidentArea.value = 'velachery';
+
+function updateIncidentDepartment(){
+  const dept = departmentMap[document.getElementById('incident-issue').value];
+  document.getElementById('incident-department').innerHTML = `<option>${dept.department}</option>`;
+}
+document.getElementById('incident-issue').addEventListener('change', updateIncidentDepartment);
+
+document.getElementById('incident-image').addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  const preview = document.getElementById('incident-image-preview');
+  if (!file) { preview.classList.remove('visible'); return; }
+  document.getElementById('incident-image-thumb').src = URL.createObjectURL(file);
+  document.getElementById('incident-image-name').textContent = `${file.name} (${Math.ceil(file.size / 1024)} KB)`;
+  preview.classList.add('visible');
+});
+
+document.getElementById('incident-report-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const file = document.getElementById('incident-image').files[0];
+  const submit = event.target.querySelector('button[type="submit"]');
+  const details = {
+    areaId: incidentArea.value,
+    description: document.getElementById('incident-description').value.trim(),
+    imageName: file ? file.name : null,
+    imageType: file ? file.type : null,
+    imageSize: file ? file.size : null
+  };
+  const finish = (imageData) => {
+    details.imageData = imageData;
+    submit.disabled = true;
+    submit.textContent = 'Sending report...';
+    sendFloodReport(document.getElementById('incident-issue').value, document.getElementById('incident-issue').selectedOptions[0].text, details);
+    setTimeout(() => { submit.disabled = false; submit.textContent = 'Submit incident report'; }, 1000);
+  };
+  if (!file) { finish(null); return; }
+  const reader = new FileReader();
+  reader.onload = () => finish(reader.result);
+  reader.readAsDataURL(file);
+});
+
+function getDepartmentFromText(text){
+  const lowered = text.toLowerCase();
+  if (lowered.includes('wire') || lowered.includes('electric') || lowered.includes('cable')) return 'wire_cut';
+  if (lowered.includes('tree') || lowered.includes('branch')) return 'tree_fall';
+  if (lowered.includes('medicine') || lowered.includes('medical') || lowered.includes('fever') || lowered.includes('insulin') || lowered.includes('injury')) return 'medical';
+  if (lowered.includes('accident') || lowered.includes('bike') || lowered.includes('injury')) return 'bike_accident';
+  if (lowered.includes('evacuat') || lowered.includes('shelter') || lowered.includes('camp')) return 'evacuation';
+  return 'road_flood';
+}
+
+function handleReportChatMessage() {
+  const input = document.getElementById('report-chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const output = document.getElementById('report-chat-output');
+  const reportType = getDepartmentFromText(text);
+  const label = {
+    road_flood: 'Road is fully flooded',
+    medical: 'Medical emergency or medicine needed',
+    bike_accident: 'Bike accident due to flood',
+    tree_fall: 'Fallen tree or blocked road',
+    wire_cut: 'Power line / wire is in water',
+    evacuation: 'Evacuation or shelter assistance'
+  }[reportType];
+
+  output.innerHTML = `User: ${text}<br>Bot: I am creating a ${label.toLowerCase()} report and routing it to the correct emergency team.`;
+  input.value = '';
+  sendFloodReport(reportType, label);
+}
+
+document.getElementById('report-chat-send').addEventListener('click', handleReportChatMessage);
+document.getElementById('report-chat-input').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') handleReportChatMessage();
+});
+
+document.querySelectorAll('.report-option').forEach((button) => {
+  button.addEventListener('click', () => sendFloodReport(button.dataset.report, button.dataset.label));
 });
 
 /* =========================================================================
@@ -1447,9 +1818,52 @@ function findAreaInText(text){
   return AREAS.find(a => t.includes(a.name.toLowerCase()) || t.includes(a.id.replace('_',' ')));
 }
 
+function reportIntentFromText(text){
+  const t = text.toLowerCase();
+  if(t.includes('wire') || t.includes('electric') || t.includes('current') || t.includes('power line')) return 'wire_cut';
+  if(t.includes('accident') || t.includes('bike') || t.includes('injury') || t.includes('crash')) return 'bike_accident';
+  if(t.includes('flooded road') || t.includes('road is full') || t.includes('water on road') || t.includes('waterlogged')) return 'road_flood';
+  return null;
+}
+
+function submitAssistantReport(reportType, message){
+  const area = findAreaInText(message) || AREAS.find(a => a.id === 'velachery') || AREAS[0];
+  const department = departmentMap[reportType];
+  const locationPromise = getCurrentLocationContext();
+  return locationPromise.then(location => fetch(`${API_BASE}/api/flood-reports`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      report_type: reportType,
+      description: message,
+      area_id: area.id,
+      latitude: Number(location.lat),
+      longitude: Number(location.lng),
+      priority: department.priority
+    })
+  })).then(async response => {
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(data.detail || 'The report could not be stored');
+    return `Emergency report #${data.id} is recorded and routed to ${data.department}. Status: ${data.status}. Location shared for ${data.area_name}.`;
+  });
+}
+
 function assistantReply(text){
   const t = text.toLowerCase();
   const mentionedArea = findAreaInText(text);
+  const reportType = reportIntentFromText(text);
+
+  if(reportType){
+    const reportLabels = {
+      road_flood: 'flooded road',
+      bike_accident: 'flood-related accident',
+      wire_cut: 'live wire or electrical hazard'
+    };
+    submitAssistantReport(reportType, text)
+      .then(reply => addMsg('bot', reply))
+      .catch(() => addMsg('bot', 'I could not reach the FloodSafe server, so this report was not stored. Please call 112 for immediate danger or start the backend on localhost:8000.'));
+    return `I identified this as a ${reportLabels[reportType]} report. I am checking your location and sending it to the responsible emergency department now.`;
+  }
 
   if(mentionedArea && (t.includes('safe') || t.includes('risk') || t.includes('flood'))){
     return `${mentionedArea.name} currently has a ${mentionedArea.level.toLowerCase()} flood-risk score (${mentionedArea.score}/100). ${recommendedAction(mentionedArea.level)}`;
@@ -1472,10 +1886,21 @@ function assistantReply(text){
   return "I can help with flood risk by area, safe routes, nearby hospitals, emergency help, or safety tips — try asking about a specific area like \"Is Adyar safe?\", or tap a quick action below.";
 }
 
-function sendChat(text){
+async function sendChat(text){
   if(!text || !text.trim()) return;
   addMsg('user', text);
-  setTimeout(()=> addMsg('bot', assistantReply(text)), 300);
+  try{
+    const response = await fetch(`${API_BASE}/api/chat`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text})
+    });
+    if(!response.ok) throw new Error('AI service unavailable');
+    const data = await response.json();
+    addMsg('bot', data.reply);
+  }catch(error){
+    setTimeout(()=> addMsg('bot', assistantReply(text)), 120);
+  }
 }
 document.getElementById('chat-send').addEventListener('click', ()=>{
   const input = document.getElementById('chat-input');
@@ -1495,7 +1920,7 @@ let selectedRole = 'resident';
 const authScreen = document.getElementById('auth-screen');
 const appShell = document.getElementById('app');
 const responderApp = document.getElementById('responder-app');
-const API_BASE = localStorage.getItem('floodsafe_api_base') || 'http://localhost:8000';
+const API_BASE = localStorage.getItem('floodsafe_api_base') || ((location.protocol === 'http:' || location.protocol === 'https:') ? location.origin : 'http://127.0.0.1:8000');
 document.querySelectorAll('.role-option').forEach(option=>{
   option.addEventListener('click', ()=>{
     selectedRole = option.dataset.role;
@@ -1539,6 +1964,51 @@ function renderResponderMap(role){
   document.getElementById('responder-map-status').textContent = `${isFire ? 'Rescue' : 'Medical'} route · OpenStreetMap`;
 }
 
+function highlightFloodFreeZone(areaId){
+  const incidentArea = AREAS.find(area => area.id === areaId) || AREAS[0];
+  const safeArea = AREAS.slice().sort((a,b) => a.score - b.score)[0];
+  if(!responderMap || !window.ol) return;
+  if(responderDecisionLayer) responderMap.removeLayer(responderDecisionLayer);
+  const project = point => ol.proj.fromLonLat([point.lng, point.lat]);
+  const route = routePoints(incidentArea, safeArea, true).map(project);
+  const features = [
+    new ol.Feature({geometry:new ol.geom.LineString(route), kind:'decision-route'}),
+    new ol.Feature({geometry:new ol.geom.Point(project(safeArea)), kind:'safe-zone'}),
+    new ol.Feature({geometry:new ol.geom.Point(project(incidentArea)), kind:'incident-zone'})
+  ];
+  responderDecisionLayer = new ol.layer.Vector({source:new ol.source.Vector({features}), style:feature=>{
+    const kind = feature.get('kind');
+    if(kind === 'decision-route') return new ol.style.Style({stroke:new ol.style.Stroke({color:'#4FAE7B',width:5,lineDash:[12,8]})});
+    return new ol.style.Style({image:new ol.style.Circle({radius:kind === 'safe-zone' ? 11 : 8,fill:new ol.style.Fill({color:kind === 'safe-zone' ? '#4FAE7B' : '#E15C50'}),stroke:new ol.style.Stroke({color:'#fff',width:2})})});
+  }});
+  responderMap.addLayer(responderDecisionLayer);
+  const mapElement = document.getElementById('responder-map');
+  mapElement.classList.add('fullscreen');
+  document.body.style.overflow = 'hidden';
+  if(!document.getElementById('responder-map-exit')){
+    const exit = document.createElement('button');
+    exit.id = 'responder-map-exit';
+    exit.className = 'responder-map-exit';
+    exit.type = 'button';
+    exit.textContent = '✕ Return to queue';
+    exit.addEventListener('click', exitResponderMapFullscreen);
+    mapElement.appendChild(exit);
+  }
+  setTimeout(() => responderMap.updateSize(), 60);
+  responderMap.getView().fit(responderDecisionLayer.getSource().getExtent(), {padding:[50,50,50,50], maxZoom:13, duration:350});
+  document.getElementById('responder-map-status').textContent = `Safe route: ${incidentArea.name} → ${safeArea.name}`;
+}
+
+function exitResponderMapFullscreen(){
+  document.getElementById('responder-map').classList.remove('fullscreen');
+  document.body.style.overflow = '';
+  if(responderMap) setTimeout(() => responderMap.updateSize(), 60);
+}
+
+function queueActionMarkup(id, areaId){
+  return `<div class="queue-actions"><button class="queue-action agree" data-decision="agree" data-report-id="${id || ''}" data-area-id="${areaId}">Agree · show safe zone</button><button class="queue-action disagree" data-decision="disagree" data-report-id="${id || ''}" data-area-id="${areaId}">Disagree · next priority</button></div>`;
+}
+
 function renderResponderWorkspace(role){
   const isFire = role === 'fire';
   const queue = isFire ? [
@@ -1558,10 +2028,102 @@ function renderResponderWorkspace(role){
     <div class="responder-stat"><b>${queue.length}</b><span>Open assignments</span></div>
     <div class="responder-stat"><b>${AREAS.filter(area=>area.level==='SEVERE').length}</b><span>Severe risk zones</span></div>
     <div class="responder-stat"><b>${locations.length}</b><span>Safety locations</span></div>`;
-  document.getElementById('rescue-queue').innerHTML = queue.map((item,index)=>`
-    <div class="ops-row"><div><h4>${index+1}. ${item.title}</h4><p>${item.detail}</p><span class="location-chip">📍 ${item.area}</span></div><div class="ops-meta"><div class="priority">${item.priority}</div><span class="risk-badge ${riskClass(AREAS.find(area=>area.name===item.area)?.level || 'HIGH')}" style="margin-top:6px">${AREAS.find(area=>area.name===item.area)?.level || 'HIGH'}</span></div></div>`).join('');
+  document.getElementById('rescue-queue').innerHTML = queue.map((item,index)=>{
+    const area = AREAS.find(area=>area.name===item.area);
+    return `<div class="ops-row" data-report-id="" data-area-id="${area?.id || ''}"><div><h4>${index+1}. ${item.title}</h4><p>${item.detail}</p><span class="location-chip">📍 ${item.area}</span>${queueActionMarkup('', area?.id || '')}</div><div class="ops-meta"><div class="priority">${item.priority}</div><span class="risk-badge ${riskClass(area?.level || 'HIGH')}" style="margin-top:6px">${area?.level || 'HIGH'}</span></div></div>`;
+  }).join('');
   document.getElementById('safety-locations').innerHTML = locations.map(item=>`<div class="ops-row"><div><h4>${item.icon} ${item.name}</h4><p>${item.detail}</p></div><span class="location-chip">OPEN</span></div>`).join('');
+  refreshResponderQueue(role);
 }
+
+async function refreshResponderQueue(role){
+  const token = localStorage.getItem('floodsafe_access_token');
+  if(!token) return;
+  try{
+    const response = await fetch(`${API_BASE}/api/emergency-requests`, {headers:{Authorization:`Bearer ${token}`}});
+    if(!response.ok) return;
+    const reports = await response.json();
+    const relevant = reports.filter(report => role === 'fire'
+      ? ['tree_fall','wire_cut','evacuation'].includes(report.type)
+      : ['medical','bike_accident'].includes(report.type));
+    const previousIds = window.responderReportIds || new Set();
+    const newReports = relevant.filter(report => !previousIds.has(report.id));
+    window.responderReportIds = new Set(relevant.map(report => report.id));
+    if(newReports.length && window.responderQueueLoaded){
+      const newest = newReports[0];
+      showResponderNotification(role === 'ambulance'
+        ? `New medical emergency report received for ambulance dispatch: ${newest.description}`
+        : `New rescue report received: ${newest.description}`);
+    }
+    window.responderQueueLoaded = true;
+    if(!relevant.length) return;
+    const priorityLabels = {critical:'CRITICAL',high:'HIGH',medium:'MEDIUM',low:'LOW'};
+    document.getElementById('rescue-queue').innerHTML = relevant.map((report,index)=>{
+      const area = AREAS.find(item=>item.id===report.area_id);
+      return `<div class="ops-row" data-report-id="${report.id}" data-area-id="${report.area_id}"><div><h4>${index+1}. ${report.type.replaceAll('_',' ')}</h4><p>${report.description}</p><span class="location-chip">📍 ${area ? area.name : report.area_id} · ${report.department}</span>${queueActionMarkup(report.id, report.area_id)}</div><div class="ops-meta"><div class="priority">${priorityLabels[report.priority] || report.priority.toUpperCase()}</div><span class="risk-badge ${riskClass(area?.level || 'HIGH')}">${area?.level || 'HIGH'}</span></div></div>`;
+    }).join('');
+    document.querySelector('#responder-stats .responder-stat b').textContent = relevant.length;
+  }catch(error){
+    console.warn('Responder report queue unavailable:', error);
+  }
+}
+
+function showResponderNotification(message){
+  document.getElementById('responder-notification-text').textContent = message;
+  document.getElementById('responder-notification').classList.add('visible');
+  if('Notification' in window && Notification.permission === 'granted'){
+    new Notification('FloodSafe emergency report', {body:message});
+  }
+}
+
+let responderRefreshTimer = null;
+function startResponderNotifications(role){
+  if(responderRefreshTimer) clearInterval(responderRefreshTimer);
+  window.responderReportIds = new Set();
+  window.responderQueueLoaded = false;
+  refreshResponderQueue(role);
+  responderRefreshTimer = setInterval(() => refreshResponderQueue(role), 5000);
+  if('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  if('BroadcastChannel' in window){
+    const channel = new BroadcastChannel('floodsafe-reports');
+    channel.onmessage = () => refreshResponderQueue(role);
+    window.responderReportChannel = channel;
+  }
+}
+
+document.getElementById('rescue-queue').addEventListener('click', async event=>{
+  const button = event.target.closest('[data-decision]');
+  if(!button) return;
+  const row = button.closest('.ops-row');
+  const decision = button.dataset.decision;
+  const reportId = button.dataset.reportId;
+  const areaId = button.dataset.areaId;
+  const token = localStorage.getItem('floodsafe_access_token');
+  button.disabled = true;
+  try{
+    if(reportId && token){
+      const response = await fetch(`${API_BASE}/api/emergency-requests/${reportId}/decision`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+        body:JSON.stringify({decision})
+      });
+      if(!response.ok) throw new Error('The responder decision could not be saved.');
+    }
+    if(decision === 'agree'){
+      row.querySelectorAll('[data-decision]').forEach(action => action.disabled = true);
+      highlightFloodFreeZone(areaId);
+      showResponderNotification('Accepted. The safest available flood-free zone is highlighted on the map.');
+    }else{
+      row.remove();
+      const next = document.querySelector('#rescue-queue .ops-row h4');
+      showResponderNotification(next ? `Declined. Next priority: ${next.textContent}` : 'Declined. No other priority is currently waiting.');
+      refreshResponderQueue(window.activeResponderRole);
+    }
+  }catch(error){
+    button.disabled = false;
+    showResponderNotification(error.message);
+  }
+});
 
 async function authenticateWithApi(email, password){
   const controller = new AbortController();
@@ -1574,6 +2136,65 @@ async function authenticateWithApi(email, password){
   return response.json();
 }
 
+async function registerWithApi(email, password){
+  const response = await fetch(`${API_BASE}/api/auth/register`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password})
+  });
+  const data = await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(data.detail || 'Registration failed');
+  return data;
+}
+
+function signOut(){
+  if(responderRefreshTimer) clearInterval(responderRefreshTimer);
+  responderRefreshTimer = null;
+  if(window.responderReportChannel){ window.responderReportChannel.close(); window.responderReportChannel = null; }
+  localStorage.removeItem('floodsafe_access_token');
+  responderApp.classList.add('hidden');
+  appShell.classList.add('hidden');
+  authScreen.classList.remove('hidden');
+  document.getElementById('account-menu').classList.add('hidden');
+  document.getElementById('account-menu-button').setAttribute('aria-expanded', 'false');
+}
+
+document.getElementById('open-register').addEventListener('click', ()=>document.getElementById('register-modal').classList.remove('hidden'));
+document.getElementById('close-register').addEventListener('click', ()=>document.getElementById('register-modal').classList.add('hidden'));
+document.getElementById('register-form').addEventListener('submit', async event=>{
+  event.preventDefault();
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value;
+  try{
+    if(location.protocol === 'file:'){
+      const accounts = JSON.parse(localStorage.getItem('floodsafe_demo_accounts') || '{}');
+      if(accounts[email.toLowerCase()]) throw new Error('An account with this email already exists');
+      accounts[email.toLowerCase()] = password;
+      localStorage.setItem('floodsafe_demo_accounts', JSON.stringify(accounts));
+    } else {
+      await registerWithApi(email, password);
+    }
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-password').value = password;
+    document.getElementById('register-modal').classList.add('hidden');
+    window.alert('Registration successful. You can now sign in.');
+  }catch(error){ window.alert(error.message || 'Registration failed.'); }
+});
+
+document.querySelectorAll('[data-provider]').forEach(button=>button.addEventListener('click', ()=>{
+  const provider = button.dataset.provider;
+  const providerUrl = localStorage.getItem(`floodsafe_${provider}_oauth_url`);
+  if(providerUrl){ window.location.href = providerUrl; return; }
+  window.alert(`${provider[0].toUpperCase()+provider.slice(1)} sign-in needs OAuth client configuration. Set floodsafe_${provider}_oauth_url after configuring the provider callback.`);
+}));
+
+const accountMenuButton = document.getElementById('account-menu-button');
+accountMenuButton.addEventListener('click', ()=>{
+  const menu = document.getElementById('account-menu');
+  const hidden = menu.classList.toggle('hidden');
+  accountMenuButton.setAttribute('aria-expanded', String(!hidden));
+});
+document.getElementById('account-logout').addEventListener('click', signOut);
+document.getElementById('responder-notification-close').addEventListener('click', ()=>document.getElementById('responder-notification').classList.remove('visible'));
+
 function openWorkspace(role){
   if(role === 'resident'){
     authScreen.classList.add('hidden');
@@ -1581,33 +2202,56 @@ function openWorkspace(role){
     setTimeout(()=>map.invalidateSize(), 50);
     return;
   }
+  window.activeResponderRole = role;
   renderResponderWorkspace(role);
   authScreen.classList.add('hidden');
   responderApp.classList.remove('hidden');
   setTimeout(()=>renderResponderMap(role), 60);
+  startResponderNotifications(role);
 }
 
 document.getElementById('login-form').addEventListener('submit', async event=>{
   event.preventDefault();
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
+  if(location.protocol === 'file:' && selectedRole !== 'resident'){
+    openWorkspace(selectedRole);
+    return;
+  }
   try{
     const session = await authenticateWithApi(email, password);
     localStorage.setItem('floodsafe_access_token', session.access_token);
     const returnedRole = session.user.role === 'fire_rescue' ? 'fire' : session.user.role === 'ambulance' ? 'ambulance' : 'resident';
+    if(selectedRole !== returnedRole){
+      localStorage.removeItem('floodsafe_access_token');
+      const selectedLabel = selectedRole === 'fire' ? 'Fire & Rescue' : selectedRole === 'ambulance' ? 'Ambulance' : 'Resident';
+      const accountLabel = returnedRole === 'fire' ? 'Fire & Rescue' : returnedRole === 'ambulance' ? 'Ambulance' : 'Resident';
+      window.alert(`This account is authorized for ${accountLabel}, not ${selectedLabel}. Use the correct responder account for this workspace.`);
+      return;
+    }
     openWorkspace(returnedRole);
   } catch(error){
     if(location.protocol !== 'file:'){
-      window.alert(error.message || 'Unable to sign in.');
+      const roleMessage = selectedRole === 'ambulance'
+        ? 'No authorized ambulance account was found. Ask an administrator to provision your ambulance email.'
+        : selectedRole === 'fire'
+          ? 'No authorized fire and rescue account was found. Ask an administrator to provision your work email.'
+          : error.message || 'Unable to sign in.';
+      window.alert(roleMessage);
       return;
+    }
+    if(selectedRole === 'resident'){
+      const accounts = JSON.parse(localStorage.getItem('floodsafe_demo_accounts') || '{}');
+      if(accounts[email.toLowerCase()] !== password){
+        window.alert('Resident access requires a registered account.');
+        return;
+      }
     }
     openWorkspace(selectedRole);
   }
 });
 document.getElementById('responder-logout').addEventListener('click', ()=>{
-  responderApp.classList.add('hidden');
-  authScreen.classList.remove('hidden');
-  localStorage.removeItem('floodsafe_access_token');
+  signOut();
 });
 </script>
 </body>

@@ -1,38 +1,41 @@
 # 🌧️ FloodSafe Chennai
 ### Predict. Navigate. Stay Safe.
 
-An AI-assisted flood safety and navigation platform for Chennai. It turns
-flood information into an actionable decision: not just "where is it
-flooding," but "what should I do next."
+FloodSafe is a deployable emergency-intelligence platform for residents,
+ambulance teams, fire and rescue teams, and operations coordinators. It turns
+flood signals and citizen reports into prioritized, explainable actions.
 
-**All technologies used (maps, weather, routing, USSD, chatbots) already
-exist individually.** The contribution here is connecting them through one
-flood-risk decision engine, and — most importantly — building it so it
-**never breaks**, even with zero API keys configured.
+The platform uses provider-backed AI with a deterministic safety fallback, so
+it remains available when an external model, weather provider, or routing
+provider is unavailable.
 
 ---
 
 ## What's in this folder
 
 ```
-floodsafe-chennai.html   ← THE MAIN DEMO. Open this file directly in any
-                            browser. No install, no build step, no API
-                            keys. Fully self-contained (map, risk engine,
-                            safe routing, emergency mode, USSD simulator,
-                            AI assistant, dashboard).
+floodsafe-chennai.html   ← browser application shell
 
-main.py                 ← FastAPI backend for the REST API.
-requirements.txt        ← Root backend dependencies.
+main.py                 ← FastAPI platform API and orchestration layer.
+ai_service.py           ← provider-backed AI gateway with safe fallback.
+db.py / auth.py         ← persistence and role-based authentication.
+requirements.txt        ← backend dependencies.
 test_app.py             ← Backend regression tests.
-floodsafe-chennai/      ← Archived nested project copy; use the root files
-                           above for the current demo.
+floodsafe-chennai/      ← legacy nested copy; root files are canonical.
 
 ```
 
-## Quickest path to a working demo
+## Run locally
 
-Just open `floodsafe-chennai.html` in a browser (double-click it, or drag
-it into a browser tab). That's it — everything works immediately:
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+Open `http://localhost:8000`. The API serves the frontend and exposes
+interactive documentation at `http://localhost:8000/docs`.
 
 - **Dashboard** — citywide stats + interactive Leaflet map of 15 Chennai
   areas, color-coded by flood risk (click any marker for a full
@@ -45,25 +48,17 @@ it into a browser tab). That's it — everything works immediately:
 - **Facilities** — hospitals, ambulance points, fire stations, relief
   centres.
 - **USSD Access** — a simulated `*123#` menu for low-connectivity access.
-- **AI Flood Assistant** — a floating chat assistant (rule-based; answers
-  using the app's own live risk data — ask it "Is Velachery safe?").
+- **USSD language selection** — `*123#` starts with English, Tamil, Telugu, or Hindi selection.
+- **AI Flood Assistant** — `/api/chat` uses the configured AI provider with
+  flood-risk and facility context, then falls back to local safety policy.
+- **Incident reports** — medical, accident, tree-fall, electrical, evacuation,
+  and road-flood reports are routed to the responsible department. Critical
+  reports appear first in the ambulance or fire-and-rescue workspace.
+- **Toll-free voice help** — browser speech playback and speech recognition
+  assist callers before dialing 1800 425 3222 when supported by the browser.
 
-## Running the backend (optional)
-
-The backend is a scaffold matching the API architecture in the spec. It
-was written but **not executed in this environment** (no network access
-to install packages here), so test it locally before relying on it:
-
-```bash
-python -m venv .venv
-# Windows PowerShell: .\.venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-Then visit `http://localhost:8000/api/health` and
-`http://localhost:8000/docs` (FastAPI's built-in interactive API docs).
+Health is available at `http://localhost:8000/api/health` and reports database,
+platform version, and AI provider mode.
 
 ## Design notes
 
@@ -72,17 +67,24 @@ Then visit `http://localhost:8000/api/health` and
   MODERATE (31–50), HIGH (51–70), SEVERE (71–100). It's a transparent
   weighted model by design — swap `compute_risk()` for a trained model
   later without touching anything else.
-- **Demo mode is explicit**: route geometry, weather, and chat responses
-  are illustrative fallback logic, not live emergency navigation or live
-  weather data.
+- **Fallback mode is explicit**: provider responses identify their source and
+  stale/fallback state. Emergency guidance never claims a dispatch was
+  completed unless the API stored the request.
 - **Deployment guard**: set `FLOODSAFE_API_KEY` to require `X-API-Key` on
   non-health API endpoints, and set `ALLOWED_ORIGINS` to trusted frontend
   origins separated by commas.
+- **Live weather provider**: set `OPENWEATHER_API_KEY` in the process
+  environment. Credentials are not stored in the HTML or committed to the
+  repository. If the provider rejects the key or is unreachable, the API
+  returns an explicit `demo_fallback` response.
+- **AI provider**: set `OPENAI_API_KEY`, `AI_BASE_URL`, and `AI_MODEL`. The
+  adapter is OpenAI-compatible and can point to a managed gateway or private
+  model endpoint.
 - **All area, rainfall, weather, and facility figures are illustrative
   demo data**, clearly labeled as such throughout the UI — not live
   government data.
 
-## Production upgrade
+## Production foundation
 
 The root backend now includes a production-shaped vertical slice:
 
@@ -90,8 +92,12 @@ The root backend now includes a production-shaped vertical slice:
 - SQLAlchemy models for users, road closures, emergency requests, and
   responder assignments. SQLite is the local default; PostgreSQL is selected
   with `DATABASE_URL`.
-- OpenWeather and OSRM adapters. Configure their keys/URLs to enable live
-  data; responses identify whether they are live or fallback data.
+- OpenWeather, OSRM, and OpenAI-compatible AI adapters. Configure keys and
+  URLs to enable live data; responses identify whether they are live or
+  fallback data.
+- Structured AI triage at `/api/ai/triage`, including category, department,
+  urgency, confidence, and local flood-risk context.
+- API-served frontend, health metadata, and OpenAPI documentation.
 - Emergency request state transitions and assignment conflict protection.
 - Structured request logs, database health reporting, Dockerfile, and
   PostgreSQL `docker-compose.yml`.

@@ -28,20 +28,23 @@ import logging
 import time
 import uuid
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from auth import create_access_token, current_user, hash_password, require_roles, verify_password
+from ai_service import generate_reply, provider_status
 from db import Assignment, Base, EmergencyRequest, EmergencyStatus, RoadClosure, User, UserRole, db_session, engine, init_db
 from providers import fetch_route, fetch_weather
 
-app = FastAPI(title="FloodSafe Chennai API", version="1.0.0")
+app = FastAPI(title="FloodSafe Chennai Platform API", version="2.0.0", description="AI-assisted flood intelligence and emergency coordination platform")
 init_db()
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"), format="%(message)s")
 logger = logging.getLogger("floodsafe")
@@ -60,21 +63,53 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestLoggingMiddleware)
 
-allowed_origins = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",") if origin.strip()]
+allowed_origins = [origin.strip() for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000,null").split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "X-API-Key"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
+    allow_credentials=True,
 )
 
 API_KEY = os.getenv("FLOODSAFE_API_KEY")
+FRONTEND_PATH = Path(__file__).with_name("floodsafe-chennai.html")
+
+
+def provision_local_staff() -> None:
+    """Create explicitly configured local responder accounts once at startup."""
+    if os.getenv("SEED_LOCAL_STAFF", "false").lower() != "true":
+        return
+    configured = (
+        ("AMBULANCE_LOGIN_EMAIL", "AMBULANCE_LOGIN_PASSWORD", UserRole.AMBULANCE),
+        ("FIRE_RESCUE_LOGIN_EMAIL", "FIRE_RESCUE_LOGIN_PASSWORD", UserRole.FIRE_RESCUE),
+    )
+    session = next(db_session())
+    try:
+        for email_key, password_key, role in configured:
+            email = os.getenv(email_key, "").strip().lower()
+            password = os.getenv(password_key, "")
+            if not email or len(password) < 8 or session.query(User).filter(User.email == email).first():
+                continue
+            session.add(User(email=email, password_hash=hash_password(password), role=role.value))
+        session.commit()
+    finally:
+        session.close()
+
+
+provision_local_staff()
 
 
 def require_api_key(x_api_key: Optional[str] = Header(default=None)):
     """Require an API key when the deployment configures one."""
     if API_KEY and x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Missing or invalid API key")
+
+
+@app.get("/", include_in_schema=False)
+def frontend():
+    return FileResponse(FRONTEND_PATH)
 
 # ---------------------------------------------------------------------------
 # DEMO DATA — clearly labeled. Replace with real datasets when available.
@@ -289,7 +324,10 @@ def chat_reply(message: str) -> str:
 USSD_SESSIONS: dict = {}
 MAX_USSD_SESSIONS = 10000
 
+USSD_LANGUAGES = {"1": "en", "2": "ta", "3": "te", "4": "hi"}
+USSD_LANGUAGE_LABELS = {"en": "English", "ta": "Tamil", "te": "Telugu", "hi": "Hindi"}
 USSD_MENU = "FloodSafe *123#\n\n1. Flood Risk\n2. Safe Route\n3. Emergency Help\n4. Nearby Hospital\n5. Safety Tips"
+USSD_LANGUAGE_MENU = "Select language / மொழியைத் தேர்வு செய்க\n\n1. English\n2. Tamil\n3. Telugu\n4. Hindi"
 
 
 def ussd_handle(session_id: str, text: str) -> str:
@@ -310,11 +348,18 @@ def ussd_handle(session_id: str, text: str) -> str:
     last = text.split("*")[-1] if text else ""
     ref_area = AREA_INDEX["velachery"]
 
-    if text.strip() in ("", "123#", "*123#") :
-        USSD_SESSIONS[session_id] = "menu"
-        return USSD_MENU
+    if text.strip() in ("", "123#", "*123#"):
+        USSD_SESSIONS[session_id] = {"state": "language"}
+        return USSD_LANGUAGE_MENU
 
-    state = USSD_SESSIONS.get(session_id, "menu")
+    session = USSD_SESSIONS.get(session_id, {"state": "language"})
+    state = session.get("state", "language") if isinstance(session, dict) else session
+    if state == "language":
+        language = USSD_LANGUAGES.get(last)
+        if not language:
+            return USSD_LANGUAGE_MENU
+        USSD_SESSIONS[session_id] = {"state": "menu", "language": language}
+        return USSD_MENU if language == "en" else f"FloodSafe *123# ({USSD_LANGUAGE_LABELS[language]})\n\n1. Flood Risk\n2. Safe Route\n3. Emergency Help\n4. Nearby Hospital\n5. Safety Tips"
     if state == "menu":
         if last == "1":
             USSD_SESSIONS[session_id] = "result"
@@ -352,6 +397,11 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=1000)
 
 
+class TriageRequest(BaseModel):
+    description: str = Field(min_length=3, max_length=2000)
+    area_id: str = Field(min_length=1, max_length=64)
+
+
 class UssdRequest(BaseModel):
     session_id: str = Field(min_length=1, max_length=128)
     text: str = Field(default="", max_length=256)
@@ -378,8 +428,25 @@ class EmergencyRequestModel(BaseModel):
     priority: str = Field(default="high", pattern="^(low|medium|high|critical)$")
 
 
+class FloodReportRequest(BaseModel):
+    report_type: str = Field(min_length=2, max_length=32)
+    description: str = Field(default="", max_length=2000)
+    area_id: str = Field(min_length=1, max_length=64)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    priority: str = Field(default="high", pattern="^(low|medium|high|critical)$")
+    image_name: Optional[str] = Field(default=None, max_length=255)
+    image_type: Optional[str] = Field(default=None, max_length=100)
+    image_size: Optional[int] = Field(default=None, ge=0, le=8_000_000)
+    image_data: Optional[str] = Field(default=None, max_length=8_000_000)
+
+
 class StatusUpdate(BaseModel):
     status: EmergencyStatus
+
+
+class ResponderDecision(BaseModel):
+    decision: str = Field(pattern="^(agree|disagree)$")
 
 
 class ClosureModel(BaseModel):
@@ -403,7 +470,7 @@ def health():
             connection.exec_driver_sql("SELECT 1")
     except Exception:
         database_ok = False
-    return {"status": "ok" if database_ok else "degraded", "database": database_ok, "time": datetime.now(timezone.utc).isoformat()}
+    return {"status": "ok" if database_ok else "degraded", "database": database_ok, "ai": provider_status(), "version": app.version, "time": datetime.now(timezone.utc).isoformat()}
 
 
 @app.post("/api/auth/register")
@@ -470,10 +537,95 @@ def create_emergency(req: EmergencyRequestModel, user: User = Depends(current_us
     return {"id": item.id, "status": item.status, "priority": item.priority}
 
 
+def department_for_report(report_type: str) -> dict:
+    mapping = {
+        "road_flood": {"department": "Public Works Department", "priority": "high", "issue": "Flooded road or waterlogged street"},
+        "medical": {"department": "Emergency Medical Services", "priority": "critical", "issue": "Medical emergency, illness, injury, or medicine needed"},
+        "bike_accident": {"department": "Emergency Medical Services", "priority": "critical", "issue": "Flood-related accident or rescue needed"},
+        "tree_fall": {"department": "Fire & Rescue", "priority": "high", "issue": "Fallen tree blocking or endangering an area"},
+        "wire_cut": {"department": "Electricity Board + Fire Rescue", "priority": "critical", "issue": "Live wire or damaged electrical line in flood water"},
+        "evacuation": {"department": "Disaster Response & Relief", "priority": "critical", "issue": "Evacuation or shelter assistance needed"},
+    }
+    return mapping.get(report_type, {"department": "Emergency Control Room", "priority": "high", "issue": "Flood emergency report"})
+
+
+def triage_report(description: str) -> dict:
+    text = description.lower()
+    if any(word in text for word in ("wire", "electric", "cable", "current")):
+        report_type = "wire_cut"
+    elif any(word in text for word in ("tree", "branch", "fallen")):
+        report_type = "tree_fall"
+    elif any(word in text for word in ("medicine", "insulin", "fever", "injury", "patient", "medical")):
+        report_type = "medical"
+    elif any(word in text for word in ("evacuate", "evacuation", "shelter", "trapped")):
+        report_type = "evacuation"
+    else:
+        report_type = "road_flood"
+    department = department_for_report(report_type)
+    return {
+        "report_type": report_type,
+        "department": department["department"],
+        "priority": department["priority"],
+        "issue": department["issue"],
+        "confidence": "high" if report_type != "road_flood" else "medium",
+        "source": "policy-model",
+    }
+
+
+def responder_roles_for_report(report_type: str) -> set[str]:
+    if report_type in {"medical", "bike_accident"}:
+        return {UserRole.AMBULANCE.value, UserRole.RESPONDER.value, UserRole.ADMIN.value}
+    if report_type in {"tree_fall", "wire_cut", "evacuation"}:
+        return {UserRole.FIRE_RESCUE.value, UserRole.RESPONDER.value, UserRole.ADMIN.value}
+    return {UserRole.RESPONDER.value, UserRole.ADMIN.value}
+
+
+@app.post("/api/flood-reports")
+def create_flood_report(req: FloodReportRequest, session: Session = Depends(db_session)):
+    if req.area_id not in AREA_INDEX:
+        raise HTTPException(status_code=404, detail="Unknown area id")
+
+    department = department_for_report(req.report_type)
+    description = req.description.strip() or department["issue"]
+    if req.image_name:
+        description = f"{description} [Condition image: {req.image_name}]"
+    area = AREA_INDEX[req.area_id]
+
+    item = EmergencyRequest(
+        request_type=req.report_type,
+        description=f"{department['issue']} — {description}",
+        area_id=req.area_id,
+        latitude=req.latitude if -90 <= req.latitude <= 90 else area["lat"],
+        longitude=req.longitude if -180 <= req.longitude <= 180 else area["lng"],
+        priority=department["priority"],
+        status=EmergencyStatus.REPORTED.value,
+    )
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+
+    return {
+        "id": item.id,
+        "report_type": req.report_type,
+        "department": department["department"],
+        "status": item.status,
+        "priority": item.priority,
+        "area_id": req.area_id,
+        "area_name": area["name"],
+        "location": {"latitude": item.latitude, "longitude": item.longitude},
+        "image_attached": bool(req.image_data or req.image_name),
+        "image_name": req.image_name,
+        "stored": True,
+    }
+
+
 @app.get("/api/emergency-requests", dependencies=[Depends(require_api_key)])
 def list_emergencies(user: User = Depends(require_roles(UserRole.RESPONDER, UserRole.AMBULANCE, UserRole.FIRE_RESCUE, UserRole.ADMIN)), session: Session = Depends(db_session)):
+    priority_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     requests = session.query(EmergencyRequest).order_by(EmergencyRequest.created_at.desc()).all()
-    return [{"id": item.id, "type": item.request_type, "description": item.description, "area_id": item.area_id, "priority": item.priority, "status": item.status} for item in requests]
+    visible = [item for item in requests if item.status not in {EmergencyStatus.RESOLVED.value, EmergencyStatus.CANCELLED.value} and user.role in responder_roles_for_report(item.request_type)]
+    visible.sort(key=lambda item: (priority_order.get(item.priority, 4), item.created_at))
+    return [{"id": item.id, "type": item.request_type, "description": item.description, "area_id": item.area_id, "priority": item.priority, "status": item.status, "department": department_for_report(item.request_type)["department"], "roles": sorted(responder_roles_for_report(item.request_type))} for item in visible]
 
 
 @app.post("/api/emergency-requests/{request_id}/assign", dependencies=[Depends(require_api_key)])
@@ -488,6 +640,25 @@ def assign_emergency(request_id: int, user: User = Depends(require_roles(UserRol
     session.add(assignment)
     session.commit()
     return {"request_id": item.id, "assignment_id": assignment.id, "status": assignment.status}
+
+
+@app.post("/api/emergency-requests/{request_id}/decision", dependencies=[Depends(require_api_key)])
+def decide_emergency(request_id: int, req: ResponderDecision, user: User = Depends(require_roles(UserRole.RESPONDER, UserRole.AMBULANCE, UserRole.FIRE_RESCUE, UserRole.ADMIN)), session: Session = Depends(db_session)):
+    item = session.get(EmergencyRequest, request_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Emergency request not found")
+    if user.role not in responder_roles_for_report(item.request_type):
+        raise HTTPException(status_code=403, detail="This report is not routed to your department")
+    if req.decision == "agree":
+        if not item.assignment:
+            session.add(Assignment(request_id=item.id, responder_id=user.id, status=EmergencyStatus.ASSIGNED.value))
+        item.status = EmergencyStatus.ASSIGNED.value
+        message = "Incident accepted and assigned to your unit"
+    else:
+        item.status = EmergencyStatus.CANCELLED.value
+        message = "Incident declined and removed from the active queue"
+    session.commit()
+    return {"id": item.id, "decision": req.decision, "status": item.status, "message": message}
 
 
 @app.patch("/api/emergency-requests/{request_id}/status", dependencies=[Depends(require_api_key)])
@@ -581,8 +752,25 @@ def emergency_facilities():
 
 
 @app.post("/api/chat", dependencies=[Depends(require_api_key)])
-def chat(req: ChatRequest):
-    return {"reply": chat_reply(req.message)}
+async def chat(req: ChatRequest):
+    fallback = chat_reply(req.message)
+    context = {
+        "areas": [{"name": area["name"], "level": area["level"], "score": area["score"]} for area in AREAS],
+        "facilities": {"hospitals": HOSPITALS[:5], "ambulance": AMBULANCE, "fire": FIRE, "relief": RELIEF},
+    }
+    return await generate_reply(req.message, context, fallback)
+
+
+@app.post("/api/ai/triage", dependencies=[Depends(require_api_key)])
+def ai_triage(req: TriageRequest):
+    area = AREA_INDEX.get(req.area_id)
+    if not area:
+        raise HTTPException(status_code=404, detail="Unknown area id")
+    result = triage_report(req.description)
+    result["area"] = area["name"]
+    result["risk_level"] = area["level"]
+    result["risk_score"] = area["score"]
+    return result
 
 
 @app.post("/api/ussd", dependencies=[Depends(require_api_key)])
