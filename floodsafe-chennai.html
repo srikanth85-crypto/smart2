@@ -169,7 +169,7 @@
   .recommend-box{margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg-panel-2);border:1px solid var(--line-soft);font-size:12.5px;line-height:1.5;}
 
   /* forecast chart */
-  .forecast-row{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:6px;}
+  .forecast-row{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:6px;overflow-x:auto;padding-bottom:4px;}
   .fbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;}
   .fbar{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),var(--accent-hi));position:relative;min-height:4px;}
   .fbar-label{font-size:10.5px;color:var(--text-low);font-family:var(--font-mono);}
@@ -535,7 +535,7 @@
             </div>
           </div>
           <div class="panel">
-            <div class="panel-head"><h3 data-i18n="forecastTitle">📈 Next 3 Hours — Flood Risk</h3></div>
+            <div class="panel-head"><h3 data-i18n="forecastTitle">📈 Next 24 Hours — Flood Risk</h3></div>
             <div class="panel-body">
               <div class="forecast-row" id="forecast-row"></div>
               <div class="disclaimer" data-i18n="forecastDisclaimer">Predicted flood risk — not a guaranteed forecast. Select an area above to update.</div>
@@ -713,6 +713,21 @@
           <button class="ussd-key" data-key="0">0 Back</button>
         </div>
       </div>
+      <div class="report-bot" id="tollfree-bot">
+        <h4>☎️ Toll-Free AI Report Bot</h4>
+        <p class="report-note">Call or tap the assistant to report a flood, medical emergency, or rescue problem. It will ask your language, location, and problem, then route the report.</p>
+        <a class="btn secondary" href="tel:18004253222">☎ Call 1800 425 3222</a>
+        <button class="report-option" id="tollfree-bot-start" type="button" style="margin-top:10px;">🎙️ Start Jarvis voice assistant</button>
+        <div id="tollfree-bot-panel" class="report-output" hidden>
+          <div id="tollfree-bot-voice-status" class="report-note">Voice assistant ready. Use the visible choices if microphone access is unavailable.</div>
+          <div id="tollfree-bot-messages" aria-live="polite"></div>
+          <div id="tollfree-bot-options" class="report-list" style="margin-top:10px;"></div>
+          <div id="tollfree-bot-input-row" style="display:none;gap:8px;margin-top:10px;">
+            <input id="tollfree-bot-input" type="text" placeholder="Describe the problem" style="flex:1;border:1px solid var(--line);background:var(--bg-panel-2);color:var(--text-hi);border-radius:10px;padding:10px 12px;" />
+            <button id="tollfree-bot-send" class="btn" type="button">Send</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -729,6 +744,12 @@
 <button id="chat-fab" title="FloodSafe AI Assistant">🤖</button>
 <div id="chat-panel" class="hidden">
   <div class="chat-head"><strong>🤖 FloodSafe AI Assistant</strong><button id="chat-close">✕</button></div>
+  <div class="chat-quick" id="chat-language" aria-label="Assistant language">
+    <button class="qchip chat-language-option active" data-chat-language="en" type="button">English</button>
+    <button class="qchip chat-language-option" data-chat-language="ta" type="button">தமிழ்</button>
+    <button class="qchip chat-language-option" data-chat-language="te" type="button">తెలుగు</button>
+    <button class="qchip chat-language-option" data-chat-language="hi" type="button">हिन्दी</button>
+  </div>
   <div class="chat-body" id="chat-body"></div>
   <div class="chat-quick" id="chat-quick">
     <button class="qchip" data-q="Check Flood Risk" data-i18n="quickCheckRisk">Check Flood Risk</button>
@@ -739,6 +760,7 @@
   </div>
   <div class="chat-input-row">
     <input type="text" id="chat-input" data-i18n-placeholder="chatPlaceholder" placeholder="Ask e.g. Is Velachery safe?" />
+    <button id="chat-voice" type="button" title="Start voice conversation" aria-label="Start voice conversation">🎙️</button>
     <button id="chat-send" data-i18n="sendButton">Send</button>
   </div>
 </div>
@@ -935,14 +957,15 @@ function renderForecast(area){
   const row = document.getElementById('forecast-row');
   row.innerHTML = '';
   const now = new Date();
-  const hours = [0,1,2,3].map(offset=>{
-    const seed = (area.rainfall_mm + offset*13) % 17;
-    const pct = Math.min(97, Math.max(5, Math.round(area.score * (0.55 + offset*0.16) + seed*0.6)));
+  const hours = Array.from({length:24}, (_, offset)=>{
+    const cycle = Math.sin((offset - 5) * Math.PI / 12) * 5;
+    const rainfallTrend = Math.min(18, offset * 0.45);
+    const pct = Math.min(97, Math.max(5, Math.round(area.score * 0.72 + cycle + rainfallTrend)));
     const h = new Date(now.getTime() + offset*3600000);
     return {label: offset===0 ? 'Now' : h.getHours().toString().padStart(2,'0')+':00', pct};
   });
   hours.forEach(h=>{
-    const wrap = document.createElement('div'); wrap.className='fbar-wrap';
+    const wrap = document.createElement('div'); wrap.className='fbar-wrap'; wrap.style.minWidth = '34px';
     wrap.innerHTML = `<div class="fbar-pct">${h.pct}%</div><div class="fbar" style="height:${Math.max(6,h.pct)}px;"></div><div class="fbar-label">${h.label}</div>`;
     row.appendChild(wrap);
   });
@@ -961,6 +984,19 @@ function renderStats(){
   document.getElementById('stat-zones').textContent = zones;
 }
 renderStats();
+
+function applyReportedFloodZone(data){
+  if(!data.area_marked_as_risk_zone) return;
+  const area = AREAS.find(item => item.id === data.area_id);
+  if(!area) return;
+  area.reported_flood = true;
+  area.level = data.area_risk_level;
+  area.score = data.area_risk_score;
+  area.road_risk = Math.max(area.road_risk, 70);
+  if(area._marker) area._marker.setIcon(L.divIcon({html:markerHtml(colorFor(area.level)), className:'', iconSize:[22,22]}));
+  renderStats();
+  if(selectedAreaId === area.id) selectArea(area.id);
+}
 
 function tickClock(){
   const now = new Date();
@@ -1005,26 +1041,47 @@ populateSelect(document.getElementById('route-to'), DESTINATIONS.length-1);
 populateSelect(document.getElementById('em-from'), 0);
 populateSelect(document.getElementById('em-to'), DESTINATIONS.length-1);
 
-function routePoints(fromPt, toPt, safer){
+const ROUTING_URL = 'https://router.project-osrm.org/route/v1/driving';
+function fallbackRoutePoints(fromPt, toPt, safer){
   const midLat = (fromPt.lat + toPt.lat) / 2;
   const midLng = (fromPt.lng + toPt.lng) / 2;
   const bend = safer ? 0.018 : -0.012;
   return [[fromPt.lat, fromPt.lng], [midLat + bend, midLng - bend], [toPt.lat, toPt.lng]];
 }
+function routePoints(fromPt, toPt, safer){
+  return fallbackRoutePoints(fromPt, toPt, safer);
+}
+async function roadRoutePoints(fromPt, toPt, safer){
+  const url = `${ROUTING_URL}/${fromPt.lng},${fromPt.lat};${toPt.lng},${toPt.lat}`;
+  try{
+    const response = await fetch(`${url}?overview=full&geometries=geojson&alternatives=true&steps=false`);
+    if(!response.ok) throw new Error(`Routing service returned ${response.status}`);
+    const payload = await response.json();
+    const route = payload.routes && payload.routes[safer && payload.routes.length > 1 ? 1 : 0];
+    if(!route || !route.geometry || !Array.isArray(route.geometry.coordinates)) throw new Error('No road geometry returned');
+    return route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+  }catch(error){
+    console.warn('Road routing unavailable; using demo geometry.', error);
+    return fallbackRoutePoints(fromPt, toPt, safer);
+  }
+}
 function routeMarker(label, color){
   return L.divIcon({html:`<div style="background:${color};width:24px;height:24px;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.55);color:#fff;font:700 11px var(--font-mono);display:flex;align-items:center;justify-content:center;">${label}</div>`, className:'', iconSize:[24,24], iconAnchor:[12,12]});
 }
-function renderRouteMap(fromPt, toPt, fromName, toName){
+async function renderRouteMap(fromPt, toPt, fromName, toName){
   routeLayer.clearLayers();
   routeMap.invalidateSize();
-  const safePoints = routePoints(fromPt, toPt, true);
-  const shortestPoints = routePoints(fromPt, toPt, false);
+  document.getElementById('route-map-status').textContent = 'Finding road-following routes...';
+  const [safePoints, shortestPoints] = await Promise.all([
+    roadRoutePoints(fromPt, toPt, true),
+    roadRoutePoints(fromPt, toPt, false)
+  ]);
   L.polyline(shortestPoints, {color:'#E15C50', weight:5, opacity:.72, dashArray:'8 8'}).bindPopup(`<b>Shortest route</b><br>${fromName} to ${toName}`).addTo(routeLayer);
   L.polyline(safePoints, {color:'#57A6B8', weight:7, opacity:.95}).bindPopup(`<b>AI Safe Route</b><br>${fromName} to ${toName}`).addTo(routeLayer);
   L.marker([fromPt.lat, fromPt.lng], {icon:routeMarker('A','#3C7A8C')}).bindPopup(`<b>Start</b><br>${fromName}`).addTo(routeLayer);
   L.marker([toPt.lat, toPt.lng], {icon:routeMarker('B','#B4553F')}).bindPopup(`<b>Destination</b><br>${toName}`).addTo(routeLayer);
   routeMap.fitBounds(L.latLngBounds(safePoints.concat(shortestPoints)), {padding:[30,30]});
-  document.getElementById('route-map-status').textContent = `${fromName} → ${toName}`;
+  document.getElementById('route-map-status').textContent = `${fromName} → ${toName} · road-following`;
 }
 
 function renderRouteResult(containerId, fromId, toId, isEmergency){
@@ -1114,36 +1171,94 @@ renderFacilityList('list-relief', RELIEF, '🏫');
 const ussdScreen = document.getElementById('ussd-screen');
 let ussdState = 'idle';
 let ussdLanguage = 'en';
+const ussdCopy = {
+  en: {
+    languagePrompt: 'Select language / மொழியைத் தேர்வு செய்க\n\n1. English\n2. Tamil\n3. Telugu\n4. Hindi',
+    chooseLanguage: 'Choose 1 English, 2 Tamil, 3 Telugu, or 4 Hindi.',
+    menu: 'FloodSafe *123# ({language})\n\n1. Flood Risk\n2. Safe Route\n3. Emergency Help\n4. Nearby Hospital\n5. Safety Tips\n\nReply with a number.',
+    floodRisk: 'Flood Risk',
+    selectedRisk: 'Your selected area has {level} flood risk ({score}/100).',
+    safeRoute: 'Safe Route',
+    safeRouteText: 'Open the Safe Route section in the app for a full comparison, or call 112 for urgent routing help.',
+    emergencyHelp: 'Emergency Help',
+    nationalEmergency: 'National Emergency',
+    ambulance: 'Ambulance',
+    fireRescue: 'Fire & Rescue',
+    nearbyHospital: 'Nearby Hospital',
+    contact: 'Contact',
+    safetyTips: 'Safety Tips',
+    tips: ['Avoid walking/driving through moving water', 'Keep phone charged', 'Move valuables to higher ground', 'Follow official alerts'],
+    back: '0. Back to menu',
+    invalid: 'Invalid option.\n\nDial *123# to restart.',
+    restart: 'Dial *123# to restart.',
+    begin: 'Dial *123# to begin.'
+  },
+  ta: {
+    languagePrompt: 'மொழியைத் தேர்வு செய்க\n\n1. ஆங்கிலம்\n2. தமிழ்\n3. தெலுங்கு\n4. இந்தி',
+    chooseLanguage: '1 ஆங்கிலம், 2 தமிழ், 3 தெலுங்கு அல்லது 4 இந்தியைத் தேர்வு செய்க.',
+    menu: 'FloodSafe *123# ({language})\n\n1. வெள்ள அபாயம்\n2. பாதுகாப்பான வழி\n3. அவசர உதவி\n4. அருகிலுள்ள மருத்துவமனை\n5. பாதுகாப்பு குறிப்புகள்\n\nஒரு எண்ணை பதிலாக உள்ளிடவும்.',
+    floodRisk: 'வெள்ள அபாயம்',
+    selectedRisk: 'நீங்கள் தேர்ந்தெடுத்த பகுதியில் {level} வெள்ள அபாயம் உள்ளது ({score}/100).',
+    safeRoute: 'பாதுகாப்பான வழி',
+    safeRouteText: 'முழுமையான ஒப்பீட்டிற்கு செயலியில் பாதுகாப்பான வழி பகுதியைத் திறக்கவும். அவசர வழிகாட்டுதலுக்கு 112-ஐ அழைக்கவும்.',
+    emergencyHelp: 'அவசர உதவி',
+    nationalEmergency: 'தேசிய அவசர உதவி',
+    ambulance: 'ஆம்புலன்ஸ்',
+    fireRescue: 'தீயணைப்பு மற்றும் மீட்பு',
+    nearbyHospital: 'அருகிலுள்ள மருத்துவமனை',
+    contact: 'தொடர்பு',
+    safetyTips: 'பாதுகாப்பு குறிப்புகள்',
+    tips: ['ஓடும் வெள்ளநீரில் நடக்கவோ வாகனம் ஓட்டவோ வேண்டாம்', 'தொலைபேசியை சார்ஜில் வைத்திருக்கவும்', 'மதிப்புள்ள பொருட்களை உயரமான இடத்திற்கு மாற்றவும்', 'அதிகாரப்பூர்வ எச்சரிக்கைகளைப் பின்பற்றவும்'],
+    back: '0. மெனுவுக்குத் திரும்ப',
+    invalid: 'தவறான விருப்பம்.\n\nமீண்டும் தொடங்க *123# அழுத்தவும்.',
+    restart: 'மீண்டும் தொடங்க *123# அழுத்தவும்.',
+    begin: 'தொடங்க *123# அழுத்தவும்.'
+  }
+};
+function ussdText(key, replacements = {}){
+  const copy = ussdCopy[ussdLanguage] || ussdCopy.en;
+  let text = copy[key] || ussdCopy.en[key] || '';
+  Object.entries(replacements).forEach(([name, value])=>{ text = text.replace(`{${name}}`, value); });
+  return text;
+}
+function ussdList(key){
+  const copy = ussdCopy[ussdLanguage] || ussdCopy.en;
+  return copy[key] || ussdCopy.en[key] || [];
+}
+function ussdLevel(level){
+  if(ussdLanguage !== 'ta') return level;
+  return {LOW:'குறைவு', MODERATE:'மிதமான', HIGH:'அதிக', SEVERE:'மிக அதிக'}[level] || level;
+}
 function ussdPrint(text){ ussdScreen.textContent = text; }
 function ussdMenu(){
   ussdState = 'menu';
-  ussdPrint(`FloodSafe *123# (${ussdLanguage.toUpperCase()})\n\n1. Flood Risk\n2. Safe Route\n3. Emergency Help\n4. Nearby Hospital\n5. Safety Tips\n\nReply with a number.`);
+  ussdPrint(ussdText('menu', {language: ussdLanguage === 'ta' ? 'தமிழ்' : ussdLanguage.toUpperCase()}));
 }
 function ussdHandle(input){
   input = input.trim();
   if(input === '*123#'){
     ussdState = 'language';
-    ussdPrint('Select language / மொழியைத் தேர்வு செய்க\n\n1. English\n2. Tamil\n3. Telugu\n4. Hindi');
+    ussdPrint(ussdText('languagePrompt'));
     return;
   }
   if(ussdState === 'language'){
     const languages = {1:'en',2:'ta',3:'te',4:'hi'};
     if(languages[input]){ ussdLanguage = languages[input]; ussdMenu(); }
-    else ussdPrint('Choose 1 English, 2 Tamil, 3 Telugu, or 4 Hindi.');
+    else ussdPrint(ussdText('chooseLanguage'));
     return;
   }
   if(ussdState === 'menu'){
     const refArea = AREAS.find(a=>a.id==='velachery');
-    if(input==='1'){ ussdState='result'; ussdPrint(`Flood Risk — ${refArea.name}\n\nYour selected area has ${refArea.level} flood risk (${refArea.score}/100).\n${recommendedAction(refArea.level)}\n\n0. Back to menu`); }
-    else if(input==='2'){ ussdState='result'; ussdPrint(`Safe Route\n\nOpen the Safe Route section in the app for a full comparison, or call 112 for urgent routing help.\n\n0. Back to menu`); }
-    else if(input==='3'){ ussdState='result'; ussdPrint(`Emergency Help\n\n112 - National Emergency\n108 - Ambulance\n101 - Fire & Rescue\n\n0. Back to menu`); }
-    else if(input==='4'){ ussdState='result'; ussdPrint(`Nearby Hospital\n\n${HOSPITALS[0].name}\n${HOSPITALS[0].addr}\nContact: ${HOSPITALS[0].contact}\n\n0. Back to menu`); }
-    else if(input==='5'){ ussdState='result'; ussdPrint(`Safety Tips\n\n- Avoid walking/driving through moving water\n- Keep phone charged\n- Move valuables to higher ground\n- Follow official alerts\n\n0. Back to menu`); }
-    else { ussdPrint("Invalid option.\n\nDial *123# to restart."); ussdState='idle'; }
+    if(input==='1'){ ussdState='result'; ussdPrint(`${ussdText('floodRisk')} — ${refArea.name}\n\n${ussdText('selectedRisk', {level:ussdLevel(refArea.level), score:refArea.score})}\n${ussdLanguage === 'ta' ? 'பரிந்துரை: தேவையற்ற பயணத்தைத் தவிர்க்கவும். அதிகாரப்பூர்வ எச்சரிக்கைகளை கவனிக்கவும்.' : recommendedAction(refArea.level)}\n\n${ussdText('back')}`); }
+    else if(input==='2'){ ussdState='result'; ussdPrint(`${ussdText('safeRoute')}\n\n${ussdText('safeRouteText')}\n\n${ussdText('back')}`); }
+    else if(input==='3'){ ussdState='result'; ussdPrint(`${ussdText('emergencyHelp')}\n\n112 - ${ussdText('nationalEmergency')}\n108 - ${ussdText('ambulance')}\n101 - ${ussdText('fireRescue')}\n\n${ussdText('back')}`); }
+    else if(input==='4'){ ussdState='result'; ussdPrint(`${ussdText('nearbyHospital')}\n\n${HOSPITALS[0].name}\n${HOSPITALS[0].addr}\n${ussdText('contact')}: ${HOSPITALS[0].contact}\n\n${ussdText('back')}`); }
+    else if(input==='5'){ ussdState='result'; ussdPrint(`${ussdText('safetyTips')}\n\n${ussdList('tips').map(tip=>`- ${tip}`).join('\n')}\n\n${ussdText('back')}`); }
+    else { ussdPrint(ussdText('invalid')); ussdState='idle'; }
   } else if(ussdState === 'result'){
-    if(input==='0'){ ussdMenu(); } else { ussdPrint("Dial *123# to restart."); ussdState='idle'; }
+    if(input==='0'){ ussdMenu(); } else { ussdPrint(ussdText('restart')); ussdState='idle'; }
   } else {
-    ussdPrint("Dial *123# to begin.");
+    ussdPrint(ussdText('begin'));
   }
 }
 document.getElementById('ussd-send').addEventListener('click', ()=>{
@@ -1152,6 +1267,312 @@ document.getElementById('ussd-send').addEventListener('click', ()=>{
 });
 document.querySelectorAll('.ussd-key').forEach(k=>{
   k.addEventListener('click', ()=> ussdHandle(k.dataset.key));
+});
+
+const tollfreeBotStart = document.getElementById('tollfree-bot-start');
+const tollfreeBotPanel = document.getElementById('tollfree-bot-panel');
+const tollfreeBotMessages = document.getElementById('tollfree-bot-messages');
+const tollfreeBotOptions = document.getElementById('tollfree-bot-options');
+const tollfreeBotInputRow = document.getElementById('tollfree-bot-input-row');
+const tollfreeBotInput = document.getElementById('tollfree-bot-input');
+const tollfreeBotVoiceStatus = document.getElementById('tollfree-bot-voice-status');
+let tollfreeBotState = 'idle';
+let tollfreeBotData = {};
+let tollfreeVoiceMode = false;
+let tollfreeRecognition = null;
+
+const tollfreeLanguageCopy = {
+  en: {
+    location: 'Please say or enter the last three digits of the affected area pincode.',
+    invalidLocation: 'That pincode ending was not recognized. Please enter the last three digits again.',
+    problem: 'What is the problem? Press a number or describe it. Press 1 for flooding, 2 for medical help, 3 for tree or rescue help, 4 for electrical danger, or 5 for evacuation.',
+    locationPlaceholder: 'Enter last three pincode digits',
+    problemPlaceholder: 'Describe the problem or choose above',
+    recording: 'I am recording the report and routing it to the responsible department.',
+    recorded: 'Report number',
+    routed: 'recorded and routed to',
+    riskZone: 'is now marked as a flood risk zone.',
+    responseReceived: 'The response team has received the report.',
+    failure: 'I could not store the report. Please call 112 for immediate danger.'
+  },
+  ta: {
+    location: 'பாதிக்கப்பட்ட பகுதியின் அஞ்சல் குறியீட்டின் கடைசி மூன்று இலக்கங்களை சொல்லவும் அல்லது உள்ளிடவும்.',
+    invalidLocation: 'அந்த அஞ்சல் குறியீடு அடையாளம் காணப்படவில்லை. கடைசி மூன்று இலக்கங்களை மீண்டும் உள்ளிடவும்.',
+    problem: 'பிரச்சினை என்ன? எண்ணை அழுத்தவும் அல்லது விவரிக்கவும். வெள்ளத்திற்கு 1, மருத்துவ உதவிக்கு 2, மரம் அல்லது மீட்புக்கு 3, மின்சார ஆபத்துக்கு 4, வெளியேற்றத்திற்கு 5 அழுத்தவும்.',
+    locationPlaceholder: 'கடைசி மூன்று இலக்கங்களை உள்ளிடவும்',
+    problemPlaceholder: 'பிரச்சினையை விவரிக்கவும்',
+    recording: 'அறிக்கையை பதிவு செய்து, பொறுப்பான துறைக்கு அனுப்புகிறேன்.',
+    recorded: 'அறிக்கை எண்',
+    routed: 'பதிவு செய்யப்பட்டு அனுப்பப்பட்டது:',
+    riskZone: 'இப்போது வெள்ள அபாய பகுதியாக குறிக்கப்பட்டுள்ளது.',
+    responseReceived: 'மீட்பு குழுவிற்கு அறிக்கை கிடைத்துள்ளது.',
+    failure: 'அறிக்கையை சேமிக்க முடியவில்லை. உடனடி ஆபத்தில் 112 அழைக்கவும்.'
+  },
+  te: {
+    location: 'ప్రభావిత ప్రాంతం పిన్‌కోడ్‌లోని చివరి మూడు అంకెలను చెప్పండి లేదా నమోదు చేయండి.',
+    invalidLocation: 'ఆ పిన్‌కోడ్ ముగింపు గుర్తించబడలేదు. చివరి మూడు అంకెలను మళ్లీ నమోదు చేయండి.',
+    problem: 'సమస్య ఏమిటి? సంఖ్యను నొక్కండి లేదా వివరించండి. వరదకు 1, వైద్య సహాయానికి 2, చెట్టు లేదా రక్షణకు 3, విద్యుత్ ప్రమాదానికి 4, తరలింపుకు 5 నొక్కండి.',
+    locationPlaceholder: 'చివరి మూడు పిన్‌కోడ్ అంకెలు',
+    problemPlaceholder: 'సమస్యను వివరించండి',
+    recording: 'నేను నివేదికను నమోదు చేసి సంబంధిత శాఖకు పంపుతున్నాను.',
+    recorded: 'నివేదిక సంఖ్య',
+    routed: 'నమోదు చేసి పంపబడింది:',
+    riskZone: 'ఇప్పుడు వరద ప్రమాద ప్రాంతంగా గుర్తించబడింది.',
+    responseReceived: 'రెస్క్యూ బృందానికి నివేదిక అందింది.',
+    failure: 'నివేదికను సేవ్ చేయలేకపోయాను. తక్షణ ప్రమాదంలో 112కు కాల్ చేయండి.'
+  },
+  hi: {
+    location: 'प्रभावित क्षेत्र के पिनकोड के अंतिम तीन अंक बोलें या दर्ज करें।',
+    invalidLocation: 'यह पिनकोड समाप्ति पहचानी नहीं गई। अंतिम तीन अंक फिर से दर्ज करें।',
+    problem: 'समस्या क्या है? संख्या दबाएं या बताएं। बाढ़ के लिए 1, चिकित्सा सहायता के लिए 2, पेड़ या बचाव के लिए 3, बिजली के खतरे के लिए 4, निकासी के लिए 5 दबाएं।',
+    locationPlaceholder: 'पिनकोड के अंतिम तीन अंक',
+    problemPlaceholder: 'समस्या बताएं',
+    recording: 'मैं रिपोर्ट दर्ज करके संबंधित विभाग को भेज रहा हूं।',
+    recorded: 'रिपोर्ट संख्या',
+    routed: 'दर्ज की गई और भेजी गई:',
+    riskZone: 'अब बाढ़ जोखिम क्षेत्र के रूप में चिह्नित है।',
+    responseReceived: 'बचाव दल को रिपोर्ट मिल गई है।',
+    failure: 'रिपोर्ट सहेजी नहीं जा सकी। तत्काल खतरे में 112 पर कॉल करें।'
+  }
+};
+
+function tollfreeCopy(key) {
+  return (tollfreeLanguageCopy[tollfreeBotData.language] || tollfreeLanguageCopy.en)[key];
+}
+
+function tollfreeVoiceLanguage(language = currentLanguage) {
+  return language === 'ta' ? 'ta-IN' : language === 'hi' ? 'hi-IN' : language === 'te' ? 'te-IN' : 'en-IN';
+}
+
+function selectJarvisVoice(language) {
+  if(!('speechSynthesis' in window)) return null;
+  const wanted = tollfreeVoiceLanguage(language).toLowerCase();
+  const voices = window.speechSynthesis.getVoices();
+  const exactVoices = voices.filter(voice => voice.lang.toLowerCase() === wanted || voice.lang.toLowerCase().startsWith(wanted.slice(0, 2)));
+  if(exactVoices.length) {
+    return exactVoices.find(voice => /david|daniel|alex|male|google uk english/.test(voice.name.toLowerCase())) || exactVoices[0];
+  }
+  if(language !== 'ta' && language !== 'te' && language !== 'hi') {
+    return voices.find(voice => /david|daniel|alex|male|google uk english/.test(voice.name.toLowerCase())) || voices[0] || null;
+  }
+  return null;
+}
+
+function tollfreeSpeak(text, language = tollfreeBotData.language || currentLanguage) {
+  if(!tollfreeVoiceMode || !('speechSynthesis' in window)) return Promise.resolve();
+  window.speechSynthesis.cancel();
+  return new Promise(resolve => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = tollfreeVoiceLanguage(language);
+    utterance.rate = 0.92;
+    utterance.pitch = 0.82;
+    utterance.volume = 1;
+    const voice = selectJarvisVoice(language);
+    if(voice) utterance.voice = voice;
+    if(!voice && language !== 'en') tollfreeBotVoiceStatus.textContent = `No ${language.toUpperCase()} speech voice is installed. Tamil, Telugu, or Hindi text is still available.`;
+    utterance.onend = resolve;
+    utterance.onerror = resolve;
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+function tollfreeListen() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!tollfreeVoiceMode || !SpeechRecognition) return;
+  if(tollfreeRecognition) tollfreeRecognition.abort();
+  tollfreeRecognition = new SpeechRecognition();
+  tollfreeRecognition.lang = tollfreeVoiceLanguage(tollfreeBotData.language || currentLanguage);
+  tollfreeRecognition.interimResults = false;
+  tollfreeRecognition.maxAlternatives = 1;
+  tollfreeBotVoiceStatus.textContent = 'Listening for your answer...';
+  tollfreeRecognition.onresult = event => {
+    const transcript = event.results[0][0].transcript.trim();
+    tollfreeBotVoiceStatus.textContent = `Heard: ${transcript}`;
+    tollfreeBotHandleVoiceTranscript(transcript);
+  };
+  tollfreeRecognition.onerror = () => {
+    tollfreeBotVoiceStatus.textContent = 'I could not hear that. Use the buttons or type your answer.';
+  };
+  tollfreeRecognition.onend = () => { tollfreeRecognition = null; };
+  try { tollfreeRecognition.start(); } catch(error) { tollfreeBotVoiceStatus.textContent = 'Microphone is busy. Use the visible choices instead.'; }
+}
+
+function tollfreePrompt(text) {
+  tollfreeBotMessage(text);
+  tollfreeSpeak(text).then(() => tollfreeListen());
+}
+
+function tollfreeBotMessage(text, role = 'bot') {
+  const message = document.createElement('div');
+  message.className = `msg ${role}`;
+  message.textContent = text;
+  tollfreeBotMessages.appendChild(message);
+  tollfreeBotMessages.scrollTop = tollfreeBotMessages.scrollHeight;
+  if(role === 'bot' && tollfreeVoiceMode) tollfreeBotVoiceStatus.textContent = 'Speaking...';
+}
+
+function tollfreeBotShowOptions(options) {
+  tollfreeBotOptions.innerHTML = options.map((option, index) => `<button class="report-option" type="button" data-tollfree-value="${option.value}" data-tollfree-index="${index + 1}">${index + 1}. ${option.label}</button>`).join('');
+  tollfreeBotOptions.querySelectorAll('[data-tollfree-value]').forEach(button => {
+    button.addEventListener('click', () => tollfreeBotHandle(button.dataset.tollfreeValue, button.textContent.replace(/^\d+\.\s*/, '')));
+  });
+}
+
+function tollfreeBotStartFlow() {
+  tollfreeBotState = 'language';
+  tollfreeVoiceMode = true;
+  tollfreeBotData = {};
+  tollfreeBotMessages.innerHTML = '';
+  tollfreeBotOptions.innerHTML = '';
+  tollfreeBotInputRow.style.display = 'none';
+  tollfreeBotPanel.hidden = false;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!('speechSynthesis' in window) || !SpeechRecognition) {
+    tollfreeVoiceMode = false;
+    tollfreeBotVoiceStatus.textContent = 'Voice is not available in this browser. The text assistant is ready.';
+  }
+  tollfreePrompt('Welcome to FloodSafe. Press 1 for Tamil, 2 for English, 3 for Telugu, or 4 for Hindi.');
+  tollfreeBotShowOptions([
+    {value:'ta', label:'Tamil'}, {value:'en', label:'English'},
+    {value:'te', label:'Telugu'}, {value:'hi', label:'Hindi'}
+  ]);
+}
+
+function tollfreeBotHandle(value, label) {
+  if(tollfreeBotState === 'language') {
+    tollfreeBotData.language = value;
+    tollfreeBotState = 'location';
+    tollfreeBotMessage(label, 'user');
+    tollfreePrompt(tollfreeCopy('location'));
+    tollfreeBotShowOptions([]);
+    tollfreeBotInputRow.style.display = 'flex';
+    tollfreeBotInput.placeholder = tollfreeCopy('locationPlaceholder');
+    return;
+  }
+  if(tollfreeBotState === 'location') {
+    const area = tollfreeAreaFromPincode(value);
+    if(!area) {
+      tollfreePrompt(tollfreeCopy('invalidLocation'));
+      return;
+    }
+    tollfreeBotData.area = area;
+    tollfreeBotState = 'problem';
+    tollfreeBotMessage(area.name, 'user');
+    tollfreePrompt(tollfreeCopy('problem'));
+    tollfreeBotShowOptions([
+      {value:'road_flood', label:tollfreeBotData.language === 'ta' ? 'வெள்ளம் / நீர் தேக்கம்' : tollfreeBotData.language === 'te' ? 'వరద / నీటి నిల్వ' : tollfreeBotData.language === 'hi' ? 'बाढ़ / जलभराव' : 'Flooding / waterlogging'},
+      {value:'medical', label:tollfreeBotData.language === 'ta' ? 'மருத்துவ அவசரம்' : tollfreeBotData.language === 'te' ? 'వైద్య అత్యవసరం' : tollfreeBotData.language === 'hi' ? 'चिकित्सा आपातकाल' : 'Medical emergency'},
+      {value:'tree_fall', label:tollfreeBotData.language === 'ta' ? 'மரம் விழுதல் / மீட்பு' : tollfreeBotData.language === 'te' ? 'చెట్టు పడటం / రక్షణ' : tollfreeBotData.language === 'hi' ? 'पेड़ गिरना / बचाव' : 'Tree fall / rescue'},
+      {value:'wire_cut', label:tollfreeBotData.language === 'ta' ? 'மின்சார ஆபத்து' : tollfreeBotData.language === 'te' ? 'విద్యుత్ ప్రమాదం' : tollfreeBotData.language === 'hi' ? 'बिजली का खतरा' : 'Electrical danger'},
+      {value:'evacuation', label:tollfreeBotData.language === 'ta' ? 'வெளியேற்றம்' : tollfreeBotData.language === 'te' ? 'తరలింపు' : tollfreeBotData.language === 'hi' ? 'निकासी' : 'Evacuation'}
+    ]);
+    tollfreeBotInputRow.style.display = 'flex';
+    tollfreeBotInput.placeholder = tollfreeCopy('problemPlaceholder');
+    return;
+  }
+  if(tollfreeBotState === 'problem') {
+    const description = tollfreeBotInput.value.trim() || label;
+    tollfreeBotSubmit(value, description);
+  }
+}
+
+function tollfreeBotHandleVoiceTranscript(transcript) {
+  const value = transcript.toLowerCase();
+  if(tollfreeBotState === 'language') {
+    const language = value.includes('tamil') || /\b(one|1)\b/.test(value) ? 'ta' : value.includes('telugu') || /\b(three|3)\b/.test(value) ? 'te' : value.includes('hindi') || /\b(four|4)\b/.test(value) ? 'hi' : 'en';
+    tollfreeBotHandle(language, language === 'ta' ? 'Tamil' : language === 'te' ? 'Telugu' : language === 'hi' ? 'Hindi' : 'English');
+    return;
+  }
+  if(tollfreeBotState === 'location') {
+    const area = tollfreeAreaFromPincode(value);
+    if(area) tollfreeBotHandle(tollfreeAreaPincodes[area.id], area.name);
+    else tollfreePrompt(tollfreeCopy('invalidLocation'));
+    return;
+  }
+  if(tollfreeBotState === 'problem') {
+    const spokenIndex = tollfreeSpokenNumber(value);
+    const problemTypes = ['road_flood', 'medical', 'tree_fall', 'wire_cut', 'evacuation'];
+    tollfreeBotHandle(spokenIndex && problemTypes[spokenIndex - 1] ? problemTypes[spokenIndex - 1] : tollfreeReportTypeFromText(transcript), transcript);
+  }
+}
+
+function tollfreeSpokenNumber(value) {
+  const words = {one:1, two:2, three:3, four:4, five:5, 'ஒரு':1, 'இரண்டு':2, 'மூன்று':3, 'நான்கு':4, 'ஐந்து':5};
+  const match = value.match(/\b([1-9]|one|two|three|four|five)\b/);
+  return match ? (Number(match[1]) || words[match[1]] || null) : null;
+}
+
+const tollfreeAreaPincodes = {
+  velachery: '042', pallikaranai: '100', tambaram: '045', saidapet: '015',
+  guindy: '032', kodambakkam: '024', madipakkam: '091', adyar: '020',
+  sholinganallur: '119', porur: '116', perungudi: '096', ambattur: '053',
+  anna_nagar: '040', t_nagar: '017', royapettah: '014'
+};
+
+function tollfreeAreaFromPincode(value) {
+  const spokenDigits = {zero:'0', one:'1', two:'2', three:'3', four:'4', five:'5', six:'6', seven:'7', eight:'8', nine:'9'};
+  const normalized = value.toLowerCase().replace(/zero|one|two|three|four|five|six|seven|eight|nine/g, word => spokenDigits[word]);
+  const digits = normalized.replace(/\D/g, '');
+  const areaId = Object.keys(tollfreeAreaPincodes).find(id => tollfreeAreaPincodes[id] === digits.slice(-3));
+  return areaId ? AREAS.find(area => area.id === areaId) : null;
+}
+
+function tollfreeBotSubmit(reportType, description) {
+  const area = tollfreeBotData.area || AREAS[0];
+  tollfreeBotState = 'submitting';
+  tollfreeBotOptions.innerHTML = '';
+  tollfreeBotInputRow.style.display = 'none';
+  tollfreeBotMessage(description, 'user');
+  tollfreeBotMessage(tollfreeCopy('recording'));
+  fetch(`${API_BASE}/api/flood-reports`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      report_type:reportType,
+      description,
+      area_id:area.id,
+      latitude:area.lat,
+      longitude:area.lng,
+      priority:departmentMap[reportType]?.priority.toLowerCase() || 'high'
+    })
+  }).then(async response => {
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok) throw new Error(data.detail || 'The report could not be stored');
+    applyReportedFloodZone(data);
+    const confirmation = `${tollfreeCopy('recorded')} ${data.id} ${tollfreeCopy('routed')} ${data.department}. ${data.area_marked_as_risk_zone ? `${data.area_name} ${tollfreeCopy('riskZone')}` : tollfreeCopy('responseReceived')}`;
+    tollfreeBotMessage(confirmation);
+    tollfreeSpeak(confirmation);
+    tollfreeBotState = 'complete';
+    localStorage.setItem('floodsafe_report_updated_at', String(Date.now()));
+  }).catch(error => {
+    const failureMessage = `${tollfreeCopy('failure')} ${error.message}`;
+    tollfreeBotMessage(failureMessage);
+    tollfreeSpeak(failureMessage);
+    tollfreeBotState = 'idle';
+  });
+}
+
+function tollfreeReportTypeFromText(text) {
+  const value = text.toLowerCase();
+  if(/insulin|medicine|medical|patient|ambulance|injury|fever|sick/.test(value)) return 'medical';
+  if(/wire|electric|current|power line|shock/.test(value)) return 'wire_cut';
+  if(/tree|branch|fallen/.test(value)) return 'tree_fall';
+  if(/evacuate|evacuation|trapped|shelter/.test(value)) return 'evacuation';
+  return 'road_flood';
+}
+
+tollfreeBotStart.addEventListener('click', tollfreeBotStartFlow);
+document.getElementById('tollfree-bot-send').addEventListener('click', () => {
+  const input = tollfreeBotInput.value.trim();
+  if(!input) return;
+  if(tollfreeBotState === 'location') {
+    tollfreeBotHandle(input, input);
+  } else if(tollfreeBotState === 'problem') {
+    tollfreeBotHandle(tollfreeReportTypeFromText(input), input);
+  }
+});
+tollfreeBotInput.addEventListener('keydown', event => {
+  if(event.key === 'Enter') document.getElementById('tollfree-bot-send').click();
 });
 
 const voiceHelpStart = document.getElementById('voice-help-start');
@@ -1247,6 +1668,7 @@ function sendFloodReport(reportType, labelText, formDetails = {}){
       if (!response.ok) {
         throw new Error(data.detail || 'Could not save report');
       }
+      applyReportedFloodZone(data);
       const output = document.getElementById('report-output');
       output.innerHTML = `
         <strong>Emergency report accepted.</strong><br>
@@ -1402,7 +1824,7 @@ const translations = {
     legendSevere: 'Severe',
     areaDetailTitle: '📍 Area Detail',
     areaDetailEmpty: 'Click any marker on the map to see its flood-risk breakdown.',
-    forecastTitle: '📈 Next 3 Hours — Flood Risk',
+    forecastTitle: '📈 Next 24 Hours — Flood Risk',
     forecastDisclaimer: 'Predicted flood risk — not a guaranteed forecast. Select an area above to update.',
     safeRouteTitle: '🧭 Flood-Aware Safe Route',
     safeRouteText: 'FloodSafe compares a synthetic demo route using flood-risk data. It is not turn-by-turn navigation; verify roads and follow official emergency instructions.',
@@ -1481,7 +1903,7 @@ const translations = {
     legendSevere: 'கடுமையான',
     areaDetailTitle: '📍 பகுதி விவரம்',
     areaDetailEmpty: 'வரைபடத்தில் எந்த மார்க்கரும் கிளிக் செய்யப்பட்டால் அதன் வெள்ள ஆபத்து பகுப்பாய்வு காண்பится.',
-    forecastTitle: '📈 அடுத்த 3 மணி நேரம் — வெள்ள ஆபத்து',
+    forecastTitle: '📈 அடுத்த 24 மணி நேரம் — வெள்ள ஆபத்து',
     forecastDisclaimer: 'முன்கணிக்கப்பட்ட வெள்ள ஆபத்து — உறுதி செய்யப்பட்ட முன்னறிவிப்பு அல்ல. மேலே ஒரு பகுதியை தேர்ந்தெடுக்கவும்.',
     safeRouteTitle: '🧭 வெள்ள-அறிவுள்ள பாதுகாப்பான பாதை',
     safeRouteText: 'FloodSafe வெள்ள ஆபத்து தரவுகளின் அடிப்படையில் மாதிரி பாதையை ஒப்பிடுகிறது. இது வழிகாட்டும் பாதை அல்ல; சாலைகளை சரிபார்த்து அதிகாரப்பூர்வ அவசர அறிவுறுத்தல்களை பின்பற்றவும்.',
@@ -1639,7 +2061,7 @@ const translations = {
     legendSevere: 'गंभीर',
     areaDetailTitle: '📍 क्षेत्र विवरण',
     areaDetailEmpty: 'नक्शे पर किसी मार्कर पर क्लिक करें, तो उसका बाढ़ जोखिम विवरण दिखेगा।',
-    forecastTitle: '📈 अगले 3 घंटे — बाढ़ जोखिम',
+    forecastTitle: '📈 अगले 24 घंटे — बाढ़ जोखिम',
     forecastDisclaimer: 'पूर्वानुमानित बाढ़ जोखिम — निश्चित पूर्वानुमान नहीं है। ऊपर से क्षेत्र चुनें।',
     safeRouteTitle: '🧭 बाढ़-चेतन सुरक्षित मार्ग',
     safeRouteText: 'FloodSafe बाढ़ जोखिम डेटा के आधार पर सिंथेटिक डेमो रोड की तुलना करता है। यह टर्न-बाय-टर्न नेविगेशन नहीं है; सड़कें सत्यापित करें और आधिकारिक आपात निर्देशों का पालन करें।',
@@ -1718,7 +2140,7 @@ const translations = {
     legendSevere: 'తీవ్రమైన',
     areaDetailTitle: '📍 ప్రాంత వివరాలు',
     areaDetailEmpty: 'పటంలోని ఎలాంటి మార్కర్‌పై క్లిక్ చేస్తే ఆ ప్రాంతం వరద ప్రమాదం వివరాలు కనబడతాయి.',
-    forecastTitle: '📈 తర్వాత 3 గంటలు — వరద ప్రమాదం',
+    forecastTitle: '📈 తర్వాత 24 గంటలు — వరద ప్రమాదం',
     forecastDisclaimer: 'అంచనా వరద ప్రమాదం — ఖచ్చితమైన అంచనా కాదు. పైన ప్రాంతాన్ని ఎంచుకోండి.',
     safeRouteTitle: '🧭 వరద-మతిన సురక్షిత మార్గం',
     safeRouteText: 'FloodSafe వరద ప్రమాద డేటా ఆధారంగా సింథటిక్ డెమో మార్గాన్ని సరిపోలుస్తుంది. ఇది టర్న్-బై-టర్న్ నావిగేషన్ కాదు; రోడ్లను పరిశీలించి అధికారిక అత్యవసర సూచనలను పాటించండి.',
@@ -1782,9 +2204,36 @@ function applyTranslations(lang){
   const currentLabel = langButton.textContent.trim();
   langButton.textContent = '🌐 ' + (lang === 'ta' ? 'தமிழ்' : lang === 'ml' ? 'മലയാളം' : lang === 'hi' ? 'हिन्दी' : lang === 'te' ? 'తెలుగు' : 'EN');
   langOptions.forEach(opt => opt.classList.toggle('active', opt.dataset.lang === lang));
+  document.querySelectorAll('.chat-language-option').forEach(option => option.classList.toggle('active', option.dataset.chatLanguage === lang));
+  translateStaticUi(lang);
   langMenu.classList.add('hidden');
   langButton.setAttribute('aria-expanded', 'false');
   document.documentElement.lang = lang;
+}
+
+function translateStaticUi(lang){
+  const copy = {
+    en: {
+      authKicker:'Chennai emergency intelligence', authTitle:'Know the water. Choose the safer way forward.', authIntro:'FloodSafe connects residents and response teams to one live operational picture of flood risk, safe locations and emergency routes.', authActive:'Chennai emergency network active', signIn:'Sign in to FloodSafe', chooseWorkspace:'Choose the workspace you need for this session.', resident:'Resident', ambulance:'Ambulance', fire:'Fire & rescue', email:'Work email or phone', password:'Password', continue:'Continue to FloodSafe', google:'Continue with Google', apple:'Continue with Apple', newResident:'New resident?', createAccount:'Create an account', authNote:'Only registered users and authorized response accounts can sign in. Responder access is role-controlled.', priority:'Priority response workspace', ambulanceView:'Ambulance dispatch view', fireView:'Fire & rescue operations', signOut:'Sign out', rescueQueue:'🆘 Prioritized rescue queue', updated:'Updated just now', safetyLocations:'📍 Safety locations & dispatch route', liveField:'Live field view', fieldStatus:'📡 Field status', dispatchGuidance:'Dispatch guidance: Verify road access before departure. The queue is sorted by risk, urgency and proximity using the current demo flood model.', hospitals:'🏥 Hospitals', ambulancePoints:'🚑 Ambulance Points', fireStations:'🚒 Fire Stations', reliefCentres:'🏫 Relief Centres', national:'National Emergency Number', ambulanceService:'Emergency Ambulance Service', fireRescue:'Fire & Rescue', call:'Call', tollFree:'Toll-Free AI Report Bot', tollFreeText:'Call or tap the assistant to report a flood, medical emergency, or rescue problem. It will ask your language, location, and problem, then route the report.', voiceHelp:'Voice help for 1800 425 3222', voiceHelpText:'Hear the hotline number and speak an emergency request in this browser.', startVoice:'🎙️ Start voice help', fileReport:'📝 File an incident report', area:'Area', problem:'What kind of problem?', department:'Department needed', upload:'Upload condition image', describe:'Describe the condition', submit:'Submit incident report', reportNote:'Your selected area and image will be shared with the routed department.', reportBot:'Toll-Free AI Report Bot', startJarvis:'🎙️ Start Jarvis voice assistant', voiceReady:'Voice assistant ready. Use the visible choices if microphone access is unavailable.', accountMenu:'Open account menu', callHotline:'Call Flood Hotline'
+    },
+    ta: {
+      authKicker:'சென்னை அவசர நுண்ணறிவு', authTitle:'நீரை அறிந்து, பாதுகாப்பான வழியைத் தேர்வு செய்யுங்கள்.', authIntro:'FloodSafe குடியிருப்பாளர்களையும் மீட்பு குழுக்களையும் வெள்ள அபாயம், பாதுகாப்பான இடங்கள் மற்றும் அவசர பாதைகள் பற்றிய ஒரே தகவலுடன் இணைக்கிறது.', authActive:'சென்னை அவசர வலையமைப்பு செயல்பாட்டில் உள்ளது', signIn:'FloodSafe-ல் உள்நுழைக', chooseWorkspace:'இந்த அமர்வுக்கான பணியிடத்தைத் தேர்ந்தெடுக்கவும்.', resident:'குடியிருப்பாளர்', ambulance:'ஆம்புலன்ஸ்', fire:'தீயணைப்பு மற்றும் மீட்பு', email:'பணி மின்னஞ்சல் அல்லது தொலைபேசி', password:'கடவுச்சொல்', continue:'FloodSafe-க்கு தொடர்க', google:'Google மூலம் தொடர்க', apple:'Apple மூலம் தொடர்க', newResident:'புதிய குடியிருப்பாளரா?', createAccount:'கணக்கை உருவாக்கு', authNote:'பதிவு செய்யப்பட்ட பயனர்களும் அங்கீகரிக்கப்பட்ட மீட்பு கணக்குகளும் மட்டுமே உள்நுழையலாம்.', priority:'முன்னுரிமை மீட்பு பணியிடம்', ambulanceView:'ஆம்புலன்ஸ் பணியகம்', fireView:'தீயணைப்பு மற்றும் மீட்பு பணிகள்', signOut:'வெளியேறு', rescueQueue:'🆘 முன்னுரிமை மீட்பு வரிசை', updated:'இப்போது புதுப்பிக்கப்பட்டது', safetyLocations:'📍 பாதுகாப்பான இடங்கள் மற்றும் பணிப்பாதை', liveField:'நேரடி களக் காட்சி', fieldStatus:'📡 கள நிலை', dispatchGuidance:'புறப்படுவதற்கு முன் சாலை அணுகலை சரிபார்க்கவும். தற்போதைய வெள்ள மாதிரியின் அடிப்படையில் வரிசை அமைக்கப்பட்டுள்ளது.', hospitals:'🏥 மருத்துவமனைகள்', ambulancePoints:'🚑 ஆம்புலன்ஸ் நிலையங்கள்', fireStations:'🚒 தீயணைப்பு நிலையங்கள்', reliefCentres:'🏫 நிவாரண மையங்கள்', national:'தேசிய அவசர எண்', ambulanceService:'அவசர ஆம்புலன்ஸ் சேவை', fireRescue:'தீயணைப்பு மற்றும் மீட்பு', call:'அழைக்க', tollFree:'இலவச AI அறிக்கை உதவி', tollFreeText:'வெள்ளம், மருத்துவ அவசரம் அல்லது மீட்பு பிரச்சினையைப் பதிவு செய்ய அழைக்கவும் அல்லது உதவியாளரைத் தொடங்கவும்.', voiceHelp:'1800 425 3222 குரல் உதவி', voiceHelpText:'ஹாட்லைன் எண்ணைக் கேட்டு, இந்த உலாவியில் அவசர கோரிக்கையைப் பேசுங்கள்.', startVoice:'🎙️ குரல் உதவியைத் தொடங்கு', fileReport:'📝 அவசர அறிக்கை', area:'பகுதி', problem:'என்ன பிரச்சினை?', department:'தேவையான துறை', upload:'நிலைமை படத்தைப் பதிவேற்றவும்', describe:'நிலைமையை விவரிக்கவும்', submit:'அறிக்கையைச் சமர்ப்பிக்கவும்', reportNote:'நீங்கள் தேர்ந்தெடுத்த பகுதியும் படமும் சம்பந்தப்பட்ட துறைக்கு அனுப்பப்படும்.', reportBot:'இலவச AI அறிக்கை உதவி', startJarvis:'🎙️ Jarvis குரல் உதவியைத் தொடங்கு', voiceReady:'குரல் உதவி தயாராக உள்ளது. மைக்ரோஃபோன் இல்லையெனில் கீழே உள்ள தேர்வுகளைப் பயன்படுத்தவும்.', accountMenu:'கணக்கு மெனுவைத் திறக்கவும்', callHotline:'ஹாட்லைனை அழைக்கவும்'
+    },
+    te: {
+      authKicker:'చెన్నై అత్యవసర నిఘా', authTitle:'నీటిని తెలుసుకొని, సురక్షిత మార్గాన్ని ఎంచుకోండి.', authIntro:'FloodSafe నివాసితులు మరియు రక్షణ బృందాలను వరద ప్రమాదం, సురక్షిత ప్రాంతాలు మరియు అత్యవసర మార్గాల సమాచారంతో కలుపుతుంది.', authActive:'చెన్నై అత్యవసర నెట్‌వర్క్ సక్రియంగా ఉంది', signIn:'FloodSafe లోకి సైన్ ఇన్ చేయండి', chooseWorkspace:'ఈ సెషన్ కోసం వర్క్‌స్పేస్‌ను ఎంచుకోండి.', resident:'నివాసి', ambulance:'అంబులెన్స్', fire:'అగ్ని మరియు రక్షణ', email:'పని ఇమెయిల్ లేదా ఫోన్', password:'పాస్‌వర్డ్', continue:'FloodSafe కు కొనసాగండి', google:'Google తో కొనసాగండి', apple:'Apple తో కొనసాగండి', newResident:'కొత్త నివాసినా?', createAccount:'ఖాతా సృష్టించండి', authNote:'నమోదైన వినియోగదారులు మరియు అనుమతించబడిన రక్షణ ఖాతాలు మాత్రమే సైన్ ఇన్ చేయగలవు.', priority:'ప్రాధాన్యత రక్షణ వర్క్‌స్పేస్', ambulanceView:'అంబులెన్స్ పంపిణీ వీక్షణ', fireView:'అగ్ని మరియు రక్షణ కార్యకలాపాలు', signOut:'సైన్ అవుట్', rescueQueue:'🆘 ప్రాధాన్యత రక్షణ క్యూ', updated:'ఇప్పుడే నవీకరించబడింది', safetyLocations:'📍 సురక్షిత ప్రాంతాలు మరియు పంపిణీ మార్గం', liveField:'లైవ్ ఫీల్డ్ వీక్షణ', fieldStatus:'📡 ఫీల్డ్ స్థితి', dispatchGuidance:'బయలుదేరే ముందు రహదారి అందుబాటును తనిఖీ చేయండి. ప్రస్తుత వరద నమూనా ఆధారంగా క్యూ క్రమబద్ధీకరించబడింది.', hospitals:'🏥 ఆసుపత్రులు', ambulancePoints:'🚑 అంబులెన్స్ పాయింట్లు', fireStations:'🚒 అగ్నిమాపక కేంద్రాలు', reliefCentres:'🏫 సహాయ కేంద్రాలు', national:'జాతీయ అత్యవసర నంబర్', ambulanceService:'అత్యవసర అంబులెన్స్ సేవ', fireRescue:'అగ్ని మరియు రక్షణ', call:'కాల్', tollFree:'టోల్-ఫ్రీ AI నివేదిక సహాయకుడు', tollFreeText:'వరద, వైద్య అత్యవసరం లేదా రక్షణ సమస్యను నివేదించడానికి కాల్ చేయండి లేదా సహాయకుడిని ప్రారంభించండి.', voiceHelp:'1800 425 3222 వాయిస్ సహాయం', voiceHelpText:'హాట్‌లైన్ నంబర్ వినండి మరియు ఈ బ్రౌజర్‌లో అత్యవసర అభ్యర్థనను మాట్లాడండి.', startVoice:'🎙️ వాయిస్ సహాయం ప్రారంభించండి', fileReport:'📝 సంఘటన నివేదిక', area:'ప్రాంతం', problem:'ఏ సమస్య?', department:'అవసరమైన శాఖ', upload:'పరిస్థితి చిత్రాన్ని అప్‌లోడ్ చేయండి', describe:'పరిస్థితిని వివరించండి', submit:'నివేదిక సమర్పించండి', reportNote:'మీరు ఎంచుకున్న ప్రాంతం మరియు చిత్రం సంబంధిత శాఖకు పంపబడతాయి.', reportBot:'టోల్-ఫ్రీ AI నివేదిక సహాయకుడు', startJarvis:'🎙️ Jarvis వాయిస్ సహాయకుడిని ప్రారంభించండి', voiceReady:'వాయిస్ సహాయకుడు సిద్ధంగా ఉన్నాడు. మైక్రోఫోన్ అందుబాటులో లేకపోతే కనిపించే ఎంపికలను ఉపయోగించండి.', accountMenu:'ఖాతా మెనును తెరవండి', callHotline:'హాట్‌లైన్‌కు కాల్ చేయండి'
+    },
+    hi: {
+      authKicker:'चेन्नई आपातकालीन जानकारी', authTitle:'पानी को समझें, सुरक्षित रास्ता चुनें।', authIntro:'FloodSafe निवासियों और बचाव दलों को बाढ़ जोखिम, सुरक्षित स्थानों और आपात मार्गों की एक जानकारी से जोड़ता है।', authActive:'चेन्नई आपात नेटवर्क सक्रिय', signIn:'FloodSafe में साइन इन करें', chooseWorkspace:'इस सत्र के लिए कार्यक्षेत्र चुनें।', resident:'निवासी', ambulance:'एम्बुलेंस', fire:'फायर और रेस्क्यू', email:'कार्य ईमेल या फोन', password:'पासवर्ड', continue:'FloodSafe पर जारी रखें', google:'Google से जारी रखें', apple:'Apple से जारी रखें', newResident:'नए निवासी हैं?', createAccount:'खाता बनाएं', authNote:'केवल पंजीकृत उपयोगकर्ता और अधिकृत बचाव खाते साइन इन कर सकते हैं।', priority:'प्राथमिकता बचाव कार्यक्षेत्र', ambulanceView:'एम्बुलेंस डिस्पैच दृश्य', fireView:'फायर और रेस्क्यू संचालन', signOut:'साइन आउट', rescueQueue:'🆘 प्राथमिकता बचाव कतार', updated:'अभी अपडेट किया गया', safetyLocations:'📍 सुरक्षित स्थान और डिस्पैच मार्ग', liveField:'लाइव फील्ड दृश्य', fieldStatus:'📡 फील्ड स्थिति', dispatchGuidance:'रवाना होने से पहले सड़क पहुंच जांचें। कतार वर्तमान बाढ़ मॉडल के जोखिम और प्राथमिकता के अनुसार है।', hospitals:'🏥 अस्पताल', ambulancePoints:'🚑 एम्बुलेंस केंद्र', fireStations:'🚒 फायर स्टेशन', reliefCentres:'🏫 राहत केंद्र', national:'राष्ट्रीय आपात नंबर', ambulanceService:'आपात एम्बुलेंस सेवा', fireRescue:'फायर और रेस्क्यू', call:'कॉल', tollFree:'टोल-फ्री AI रिपोर्ट सहायक', tollFreeText:'बाढ़, चिकित्सा आपातकाल या बचाव समस्या की रिपोर्ट करने के लिए कॉल करें या सहायक शुरू करें।', voiceHelp:'1800 425 3222 वॉइस सहायता', voiceHelpText:'हॉटलाइन नंबर सुनें और इस ब्राउज़र में आपात अनुरोध बोलें।', startVoice:'🎙️ वॉइस सहायता शुरू करें', fileReport:'📝 घटना रिपोर्ट', area:'क्षेत्र', problem:'समस्या क्या है?', department:'आवश्यक विभाग', upload:'स्थिति की तस्वीर अपलोड करें', describe:'स्थिति बताएं', submit:'रिपोर्ट जमा करें', reportNote:'आपका चुना हुआ क्षेत्र और तस्वीर संबंधित विभाग को भेजी जाएगी।', reportBot:'टोल-फ्री AI रिपोर्ट सहायक', startJarvis:'🎙️ Jarvis वॉइस सहायक शुरू करें', voiceReady:'वॉइस सहायक तैयार है। माइक्रोफोन उपलब्ध न हो तो दिखाई देने वाले विकल्पों का उपयोग करें।', accountMenu:'खाता मेनू खोलें', callHotline:'हॉटलाइन पर कॉल करें'
+    }
+  }[lang] || {};
+  const set = (selector, key) => { const element = document.querySelector(selector); if(element && copy[key]) element.textContent = copy[key]; };
+  const setAll = (selector, key) => document.querySelectorAll(selector).forEach(element => { if(copy[key]) element.textContent = copy[key]; });
+  const setNth = (selector, index, value) => { const element = document.querySelectorAll(selector)[index]; if(element && value) element.textContent = value; };
+  set('.auth-kicker', 'authKicker'); set('.auth-intro h2', 'authTitle'); set('.auth-intro p', 'authIntro'); set('.auth-signal', 'authActive'); set('.auth-form h3', 'signIn'); set('.auth-form .form-copy', 'chooseWorkspace');
+  setAll('.role-option[data-role="resident"]', 'resident'); setAll('.role-option[data-role="ambulance"]', 'ambulance'); setAll('.role-option[data-role="fire"]', 'fire'); set('label[for="login-email"]', 'email'); set('label[for="login-password"]', 'password'); set('.auth-submit', 'continue'); set('[data-provider="google"]', 'google'); set('[data-provider="apple"]', 'apple'); set('.auth-links span', 'newResident'); set('#open-register', 'createAccount'); set('.auth-note', 'authNote');
+  set('.responder-head .auth-kicker', 'priority'); set('#responder-subtitle', 'ambulanceView'); set('#responder-logout', 'signOut'); set('#account-menu-button', 'accountMenu'); set('#rescue-queue + *', 'updated'); set('.responder-grid .panel:first-child h3', 'rescueQueue'); set('.responder-grid .panel:nth-child(2) h3', 'safetyLocations'); set('#responder-map-status', 'liveField'); set('.responder-grid .panel:last-child h3', 'fieldStatus'); set('.responder-grid .panel:last-child .recommend-box', 'dispatchGuidance');
+  set('#view-facilities > .dash-grid:first-of-type .panel:nth-child(1) h3', 'hospitals'); set('#view-facilities > .dash-grid:first-of-type .panel:nth-child(2) h3', 'ambulancePoints'); set('#view-facilities > .dash-grid:last-of-type .panel:nth-child(1) h3', 'fireStations'); set('#view-facilities > .dash-grid:last-of-type .panel:nth-child(2) h3', 'reliefCentres');
+  setNth('.helpline-card .name', 0, copy.national); setNth('.helpline-card .name', 1, copy.ambulanceService); setNth('.helpline-card .name', 2, copy.fireRescue); setNth('.helpline-card .callbtn', 0, `${copy.call} 112`); setNth('.helpline-card .callbtn', 1, `${copy.call} 108`); setNth('.helpline-card .callbtn', 2, `${copy.call} 101`); set('#flood-report-bot h4', 'tollFree'); set('#flood-report-bot .voice-assistant strong', 'voiceHelp'); set('#flood-report-bot .voice-assistant p', 'voiceHelpText'); set('#voice-help-start', 'startVoice'); set('#incident-report-form h5', 'fileReport'); set('label[for="incident-area"]', 'area'); set('label[for="incident-issue"]', 'problem'); set('label[for="incident-department"]', 'department'); set('label[for="incident-image"]', 'upload'); set('label[for="incident-description"]', 'describe'); set('#incident-report-form .report-note', 'reportNote'); set('#incident-report-form button[type="submit"]', 'submit'); set('#tollfree-bot h4', 'reportBot'); set('#tollfree-bot-start', 'startJarvis'); set('#tollfree-bot-voice-status', 'voiceReady');
 }
 
 langButton.addEventListener('click', ()=>{
@@ -1799,11 +2248,106 @@ langOptions.forEach(option => {
 const chatFab = document.getElementById('chat-fab');
 const chatPanel = document.getElementById('chat-panel');
 const chatBody = document.getElementById('chat-body');
+const chatVoice = document.getElementById('chat-voice');
+const chatLanguageOptions = document.querySelectorAll('.chat-language-option');
+let chatVoiceConversation = false;
+let chatRecognition = null;
 chatFab.addEventListener('click', ()=>{
   chatPanel.classList.toggle('hidden');
-  if(chatBody.children.length===0){ addMsg('bot', "Hi, I'm the FloodSafe AI Assistant. Ask me things like \"Is Velachery safe?\" or tap a quick action below."); }
+  if(chatBody.children.length===0){
+    const greetings = {
+      en: 'Hi, I am the FloodSafe AI Assistant. Ask me about flood risk, safe routes, hospitals, or emergency help.',
+      ta: 'வணக்கம், நான் FloodSafe AI உதவியாளர். வெள்ள அபாயம், பாதுகாப்பான பாதைகள், மருத்துவமனைகள் அல்லது அவசர உதவி பற்றி கேளுங்கள்.',
+      te: 'నమస్కారం, నేను FloodSafe AI సహాయకుడిని. వరద ప్రమాదం, సురక్షిత మార్గాలు, ఆసుపత్రులు లేదా అత్యవసర సహాయం గురించి అడగండి.',
+      hi: 'नमस्ते, मैं FloodSafe AI सहायक हूं। बाढ़ जोखिम, सुरक्षित मार्ग, अस्पताल या आपात सहायता के बारे में पूछें।'
+    };
+    const greeting = greetings[currentLanguage] || greetings.en;
+    addMsg('bot', greeting);
+    speakChatResponse(greeting);
+  }
 });
-document.getElementById('chat-close').addEventListener('click', ()=>chatPanel.classList.add('hidden'));
+document.getElementById('chat-close').addEventListener('click', ()=>{
+  chatVoiceConversation = false;
+  if(chatRecognition) chatRecognition.abort();
+  chatPanel.classList.add('hidden');
+});
+
+function setAssistantLanguage(language) {
+  currentLanguage = language;
+  chatLanguageOptions.forEach(option => option.classList.toggle('active', option.dataset.chatLanguage === language));
+  const acknowledgements = {
+    en: 'English selected. I will continue this conversation in English.',
+    ta: 'தமிழ் தேர்ந்தெடுக்கப்பட்டது. இனி இந்த உரையாடல் தமிழில் தொடரும்.',
+    te: 'తెలుగు ఎంచుకోబడింది. ఇకపై ఈ సంభాషణ తెలుగులో కొనసాగుతుంది.',
+    hi: 'हिन्दी चुनी गई है। अब यह बातचीत हिन्दी में जारी रहेगी।'
+  };
+  const acknowledgement = acknowledgements[language] || acknowledgements.en;
+  addMsg('bot', acknowledgement);
+  speakChatResponse(acknowledgement);
+}
+
+chatLanguageOptions.forEach(option => option.addEventListener('click', () => setAssistantLanguage(option.dataset.chatLanguage)));
+
+function speakChatResponse(text){
+  if(!('speechSynthesis' in window)) return Promise.resolve();
+  window.speechSynthesis.cancel();
+  return new Promise(resolve => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = tollfreeVoiceLanguage(currentLanguage);
+    utterance.rate = 0.92;
+    utterance.pitch = 0.82;
+    const voice = selectJarvisVoice(currentLanguage);
+    if(voice) utterance.voice = voice;
+    if(!voice && currentLanguage !== 'en') chatVoice.title = `No ${currentLanguage.toUpperCase()} speech voice installed; install the language voice pack`;
+    utterance.onend = () => { if(chatVoiceConversation) startChatListening(); resolve(); };
+    utterance.onerror = resolve;
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+function startChatListening(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!chatVoiceConversation || !SpeechRecognition) return;
+  if(chatRecognition) chatRecognition.abort();
+  chatRecognition = new SpeechRecognition();
+  chatRecognition.lang = tollfreeVoiceLanguage(currentLanguage);
+  chatRecognition.interimResults = false;
+  chatRecognition.maxAlternatives = 1;
+  chatVoice.textContent = '🔴';
+  chatVoice.title = 'Listening... click to stop';
+  chatRecognition.onresult = event => {
+    const transcript = event.results[0][0].transcript.trim();
+    document.getElementById('chat-input').value = transcript;
+    sendChat(transcript);
+    document.getElementById('chat-input').value = '';
+  };
+  chatRecognition.onerror = () => {
+    chatVoice.textContent = '🎙️';
+    chatVoice.title = 'Start voice conversation';
+    addMsg('bot', 'I could not hear you. Please try the microphone again or type your question.');
+    chatVoiceConversation = false;
+  };
+  chatRecognition.onend = () => { chatRecognition = null; };
+  try { chatRecognition.start(); } catch(error) { chatVoiceConversation = false; }
+}
+
+chatVoice.addEventListener('click', ()=>{
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition || !('speechSynthesis' in window)) {
+    addMsg('bot', 'Voice conversation is not supported by this browser. You can continue by typing.');
+    return;
+  }
+  chatVoiceConversation = !chatVoiceConversation;
+  if(chatVoiceConversation){
+    chatVoice.textContent = '🔴';
+    speakChatResponse('Voice conversation started. How can I help you?');
+  } else {
+    if(chatRecognition) chatRecognition.abort();
+    chatVoice.textContent = '🎙️';
+    chatVoice.title = 'Start voice conversation';
+    window.speechSynthesis.cancel();
+  }
+});
 
 function addMsg(role, text){
   const div = document.createElement('div');
@@ -1860,8 +2404,12 @@ function assistantReply(text){
       wire_cut: 'live wire or electrical hazard'
     };
     submitAssistantReport(reportType, text)
-      .then(reply => addMsg('bot', reply))
-      .catch(() => addMsg('bot', 'I could not reach the FloodSafe server, so this report was not stored. Please call 112 for immediate danger or start the backend on localhost:8000.'));
+      .then(reply => { addMsg('bot', reply); speakChatResponse(reply); })
+      .catch(() => {
+        const reply = 'I could not reach the FloodSafe server, so this report was not stored. Please call 112 for immediate danger or start the backend on localhost:8000.';
+        addMsg('bot', reply);
+        speakChatResponse(reply);
+      });
     return `I identified this as a ${reportLabels[reportType]} report. I am checking your location and sending it to the responsible emergency department now.`;
   }
 
@@ -1893,13 +2441,18 @@ async function sendChat(text){
     const response = await fetch(`${API_BASE}/api/chat`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:text})
+      body:JSON.stringify({message:text, language:currentLanguage})
     });
     if(!response.ok) throw new Error('AI service unavailable');
     const data = await response.json();
     addMsg('bot', data.reply);
+    speakChatResponse(data.reply);
   }catch(error){
-    setTimeout(()=> addMsg('bot', assistantReply(text)), 120);
+    setTimeout(()=>{
+      const reply = assistantReply(text);
+      addMsg('bot', reply);
+      speakChatResponse(reply);
+    }, 120);
   }
 }
 document.getElementById('chat-send').addEventListener('click', ()=>{

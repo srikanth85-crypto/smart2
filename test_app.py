@@ -36,6 +36,16 @@ def test_invalid_area_returns_404():
     assert response.status_code == 404
 
 
+def test_forecast_returns_24_hour_prediction():
+    response = client.get('/api/forecast?area=velachery')
+    assert response.status_code == 200
+    body = response.json()
+    assert body['horizon_hours'] == 24
+    assert len(body['forecast']) == 24
+    assert body['method'] == 'weighted-risk-projection'
+    assert all(point['risk_level'] in {'LOW', 'MODERATE', 'HIGH', 'SEVERE'} for point in body['forecast'])
+
+
 def test_chat_reply_mentions_area():
     response = client.post('/api/chat', json={'message': 'Is Velachery safe?'})
     assert response.status_code == 200
@@ -43,6 +53,13 @@ def test_chat_reply_mentions_area():
     assert 'Velachery' in body['reply']
     assert 'score' in body['reply'].lower()
     assert 'ai' in body
+
+
+def test_chat_reply_uses_selected_language():
+    response = client.post('/api/chat', json={'message': 'Is Velachery safe?', 'language': 'ta'})
+    assert response.status_code == 200
+    body = response.json()
+    assert 'தமிழ்' in body['reply'] or 'வெள்ள' in body['reply']
 
 
 def test_ai_triage_routes_medical_report():
@@ -95,6 +112,22 @@ def test_flood_report_is_stored_and_routed():
     assert payload['status'] == 'reported'
     assert payload['department'] == 'Electricity Board + Fire Rescue'
     assert payload['area_name'] == 'Velachery'
+
+
+def test_flood_report_marks_area_as_risk_zone():
+    response = client.post('/api/flood-reports', json={
+        'report_type': 'road_flood',
+        'description': 'Flood water covering the road near Adyar bridge',
+        'area_id': 'adyar',
+        'latitude': 13.0012,
+        'longitude': 80.2565,
+        'priority': 'high',
+    })
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload['area_marked_as_risk_zone'] is True
+    assert payload['area_risk_level'] in {'HIGH', 'SEVERE'}
+    assert main.AREA_INDEX['adyar']['reported_flood'] is True
 
 
 def test_medical_report_is_critical_and_routes_to_ambulance():

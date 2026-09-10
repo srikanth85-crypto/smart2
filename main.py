@@ -203,6 +203,33 @@ for a in AREAS:
     a["road_risk"] = road_risk(a)
 
 
+def mark_area_as_reported_flood(area_id: str) -> dict:
+    """Elevate an area when a citizen reports flooding there."""
+    area = AREA_INDEX[area_id]
+    area["reported_flood"] = True
+    area["level"] = "SEVERE" if area["score"] >= 71 else "HIGH"
+    area["score"] = max(area["score"], 71.0 if area["level"] == "SEVERE" else 51.0)
+    area["road_risk"] = max(area["road_risk"], 70)
+    return area
+
+
+def restore_reported_flood_zones() -> None:
+    """Restore flood-zone markers from persisted road-flood reports."""
+    session = next(db_session())
+    try:
+        reports = session.query(EmergencyRequest.area_id).filter(
+            EmergencyRequest.request_type == "road_flood"
+        ).distinct().all()
+        for (area_id,) in reports:
+            if area_id in AREA_INDEX:
+                mark_area_as_reported_flood(area_id)
+    finally:
+        session.close()
+
+
+restore_reported_flood_zones()
+
+
 def haversine_km(lat1, lon1, lat2, lon2) -> float:
     r = 6371
     p1, p2 = math.radians(lat1), math.radians(lat2)
@@ -291,7 +318,7 @@ def get_weather(area_id: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def chat_reply(message: str) -> str:
+def chat_reply(message: str, language: str = "en") -> str:
     text = message.lower()
     mentioned = next((a for a in AREAS if a["name"].lower() in text), None)
 
@@ -302,18 +329,54 @@ def chat_reply(message: str) -> str:
         pass
 
     if mentioned and any(k in text for k in ["safe", "risk", "flood"]):
-        return f"{mentioned['name']} currently has a {mentioned['level'].lower()} flood-risk score ({mentioned['score']}/100). {recommended_action(mentioned['level'])}"
+        messages = {
+            "en": f"{mentioned['name']} currently has a {mentioned['level'].lower()} flood-risk score ({mentioned['score']}/100). {recommended_action(mentioned['level'])}",
+            "ta": f"{mentioned['name']} பகுதியில் தற்போது {mentioned['level']} வெள்ள அபாயம் உள்ளது ({mentioned['score']}/100). தேவையற்ற பயணத்தைத் தவிர்த்து, அதிகாரப்பூர்வ எச்சரிக்கைகளைப் பின்பற்றுங்கள்.",
+            "te": f"{mentioned['name']} ప్రాంతంలో ప్రస్తుతం {mentioned['level']} వరద ప్రమాదం ఉంది ({mentioned['score']}/100). అవసరం లేని ప్రయాణాన్ని నివారించి అధికారిక హెచ్చరికలను పాటించండి.",
+            "hi": f"{mentioned['name']} में अभी {mentioned['level']} बाढ़ जोखिम है ({mentioned['score']}/100)। अनावश्यक यात्रा से बचें और आधिकारिक चेतावनियों का पालन करें।",
+        }
+        return messages.get(language, messages["en"])
     if "emergency" in text or "help" in text:
-        return "For immediate danger, call 112, 108 (Ambulance) or 101 (Fire). Open Emergency Mode for a prioritized safe route."
+        messages = {
+            "en": "For immediate danger, call 112, 108 (Ambulance) or 101 (Fire). Open Emergency Mode for a prioritized safe route.",
+            "ta": "உடனடி ஆபத்து என்றால் 112, 108 (ஆம்புலன்ஸ்) அல்லது 101 (தீயணைப்பு) அழைக்கவும். பாதுகாப்பான பாதைக்கு Emergency Mode-ஐ திறக்கவும்.",
+            "te": "తక్షణ ప్రమాదంలో 112, 108 (అంబులెన్స్) లేదా 101 (అగ్నిమాపక)కు కాల్ చేయండి. సురక్షిత మార్గం కోసం Emergency Mode తెరవండి.",
+            "hi": "तत्काल खतरे में 112, 108 (एम्बुलेंस) या 101 (फायर) पर कॉल करें। सुरक्षित मार्ग के लिए Emergency Mode खोलें।",
+        }
+        return messages.get(language, messages["en"])
     if "hospital" in text:
-        return f"Nearby hospitals include {HOSPITALS[0]['name']} and {HOSPITALS[1]['name']}."
+        messages = {
+            "en": f"Nearby hospitals include {HOSPITALS[0]['name']} and {HOSPITALS[1]['name']}.",
+            "ta": f"அருகிலுள்ள மருத்துவமனைகள் {HOSPITALS[0]['name']} மற்றும் {HOSPITALS[1]['name']}.",
+            "te": f"సమీపంలోని ఆసుపత్రులు {HOSPITALS[0]['name']} మరియు {HOSPITALS[1]['name']}.",
+            "hi": f"पास के अस्पतालों में {HOSPITALS[0]['name']} और {HOSPITALS[1]['name']} शामिल हैं।",
+        }
+        return messages.get(language, messages["en"])
     if "route" in text:
-        return "Open Safe Route and enter your starting location and destination for a flood-risk-aware comparison."
+        messages = {
+            "en": "Open Safe Route and enter your starting location and destination for a flood-risk-aware comparison.",
+            "ta": "Safe Route-ஐ திறந்து, தொடக்க இடத்தையும் இலக்கையும் உள்ளிட்டு வெள்ள அபாயத்தை ஒப்பிடுங்கள்.",
+            "te": "Safe Route తెరిచి, ప్రారంభ స్థలం మరియు గమ్యాన్ని నమోదు చేసి వరద ప్రమాదాన్ని పోల్చండి.",
+            "hi": "Safe Route खोलकर अपना प्रारंभिक स्थान और गंतव्य डालें और बाढ़ जोखिम की तुलना करें।",
+        }
+        return messages.get(language, messages["en"])
     if "tip" in text or "safety" in text:
-        return "Avoid moving water, keep your phone charged, move valuables to higher ground, and follow official alerts."
+        messages = {
+            "en": "Avoid moving water, keep your phone charged, move valuables to higher ground, and follow official alerts.",
+            "ta": "ஓடும் நீரைத் தவிர்க்கவும், கைபேசியை சார்ஜில் வைத்திருக்கவும், பொருட்களை உயரமான இடத்திற்கு மாற்றவும், அதிகாரப்பூர்வ எச்சரிக்கைகளைப் பின்பற்றவும்.",
+            "te": "ప్రవహించే నీటిని నివారించండి, ఫోన్ ఛార్జ్‌లో ఉంచండి, విలువైన వస్తువులను ఎత్తైన ప్రదేశానికి మార్చండి, అధికారిక హెచ్చరికలను పాటించండి.",
+            "hi": "बहते पानी से बचें, फोन चार्ज रखें, कीमती सामान ऊंची जगह ले जाएं और आधिकारिक चेतावनियों का पालन करें।",
+        }
+        return messages.get(language, messages["en"])
     if mentioned:
         return f"{mentioned['name']}: risk score {mentioned['score']}/100 ({mentioned['level']})."
-    return "I can help with flood risk by area, safe routes, hospitals, emergency help, or safety tips."
+    messages = {
+        "en": "I can help with flood risk by area, safe routes, hospitals, emergency help, or safety tips.",
+        "ta": "பகுதி வெள்ள அபாயம், பாதுகாப்பான பாதைகள், மருத்துவமனைகள், அவசர உதவி அல்லது பாதுகாப்பு குறிப்புகள் குறித்து நான் உதவலாம்.",
+        "te": "ప్రాంత వరద ప్రమాదం, సురక్షిత మార్గాలు, ఆసుపత్రులు, అత్యవసర సహాయం లేదా భద్రతా సూచనలపై నేను సహాయం చేయగలను.",
+        "hi": "मैं क्षेत्रीय बाढ़ जोखिम, सुरक्षित मार्ग, अस्पताल, आपात सहायता या सुरक्षा सुझावों में मदद कर सकता हूं।",
+    }
+    return messages.get(language, messages["en"])
 
 
 # ---------------------------------------------------------------------------
@@ -395,6 +458,7 @@ class RouteRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=1000)
+    language: str = Field(default="en", pattern="^(en|ta|te|hi)$")
 
 
 class TriageRequest(BaseModel):
@@ -587,6 +651,9 @@ def create_flood_report(req: FloodReportRequest, session: Session = Depends(db_s
 
     department = department_for_report(req.report_type)
     description = req.description.strip() or department["issue"]
+    is_flood_report = req.report_type == "road_flood" or any(
+        word in description.lower() for word in ("flood", "waterlogged", "water on road", "flooded")
+    )
     if req.image_name:
         description = f"{description} [Condition image: {req.image_name}]"
     area = AREA_INDEX[req.area_id]
@@ -603,6 +670,7 @@ def create_flood_report(req: FloodReportRequest, session: Session = Depends(db_s
     session.add(item)
     session.commit()
     session.refresh(item)
+    area_risk = mark_area_as_reported_flood(req.area_id) if is_flood_report else area
 
     return {
         "id": item.id,
@@ -615,6 +683,9 @@ def create_flood_report(req: FloodReportRequest, session: Session = Depends(db_s
         "location": {"latitude": item.latitude, "longitude": item.longitude},
         "image_attached": bool(req.image_data or req.image_name),
         "image_name": req.image_name,
+        "area_risk_level": area_risk["level"],
+        "area_risk_score": area_risk["score"],
+        "area_marked_as_risk_zone": is_flood_report,
         "stored": True,
     }
 
@@ -716,11 +787,24 @@ def forecast(area: str = "velachery"):
         raise HTTPException(status_code=404, detail="Unknown area id")
     now = datetime.now(timezone.utc)
     points = []
-    for offset in range(4):
-        seed = (a["rainfall_mm"] + offset * 13) % 17
-        pct = min(97, max(5, round(a["score"] * (0.55 + offset * 0.16) + seed * 0.6)))
-        points.append({"time": (now + timedelta(hours=offset)).strftime("%H:00"), "risk_pct": pct})
-    return {"area": a["name"], "forecast": points, "disclaimer": "Predicted flood risk — not a guaranteed forecast."}
+    for offset in range(24):
+        # Project the current weighted risk across the next day with a small,
+        # deterministic rainfall-cycle adjustment for the demo dataset.
+        cycle = math.sin((offset - 5) * math.pi / 12) * 5
+        rainfall_trend = min(18, offset * 0.45)
+        pct = round(max(5, min(97, a["score"] * 0.72 + cycle + rainfall_trend)))
+        points.append({
+            "time": (now + timedelta(hours=offset)).strftime("%H:00"),
+            "risk_pct": pct,
+            "risk_level": classify(pct),
+        })
+    return {
+        "area": a["name"],
+        "horizon_hours": 24,
+        "method": "weighted-risk-projection",
+        "forecast": points,
+        "disclaimer": "24-hour flood-risk projection based on current demo signals; not a guaranteed forecast.",
+    }
 
 
 @app.post("/api/safe-route", dependencies=[Depends(require_api_key)])
@@ -753,8 +837,9 @@ def emergency_facilities():
 
 @app.post("/api/chat", dependencies=[Depends(require_api_key)])
 async def chat(req: ChatRequest):
-    fallback = chat_reply(req.message)
+    fallback = chat_reply(req.message, req.language)
     context = {
+        "language": req.language,
         "areas": [{"name": area["name"], "level": area["level"], "score": area["score"]} for area in AREAS],
         "facilities": {"hospitals": HOSPITALS[:5], "ambulance": AMBULANCE, "fire": FIRE, "relief": RELIEF},
     }

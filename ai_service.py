@@ -14,6 +14,8 @@ import httpx
 
 AI_SYSTEM_PROMPT = (
     "You are FloodSafe's emergency intelligence assistant. Give concise, "
+    "Respond in the language named in the supplied context, preserving place "
+    "names and emergency phone numbers. "
     "actionable guidance. Never claim to dispatch responders, diagnose a "
     "patient, or know live conditions unless the supplied context proves it. "
     "For immediate danger, direct the user to local emergency services."
